@@ -1,7 +1,8 @@
 package com.auction.auction_backend.modules.product.service.impl;
 
 import com.auction.auction_backend.common.enums.ProductStatus;
-import com.auction.auction_backend.common.exception.custom.NotFoundException;
+import com.auction.auction_backend.common.exception.AppException;
+import com.auction.auction_backend.common.exception.ErrorCode;
 import com.auction.auction_backend.modules.product.dto.request.CreateProductRequest;
 import com.auction.auction_backend.modules.product.entity.Category;
 import com.auction.auction_backend.modules.product.entity.Product;
@@ -32,10 +33,10 @@ public class ProductServiceImpl implements ProductService {
     public void createProduct(CreateProductRequest request) {
         UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User seller = userRepository.findById(currentUser.getId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new NotFoundException("Category not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Product product = Product.builder()
                 .title(request.getTitle())
