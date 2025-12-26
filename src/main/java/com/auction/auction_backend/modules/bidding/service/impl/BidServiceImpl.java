@@ -5,7 +5,9 @@ import com.auction.auction_backend.common.exception.AppException;
 import com.auction.auction_backend.common.exception.ErrorCode;
 
 import com.auction.auction_backend.modules.bidding.dto.request.PlaceBidRequest;
+import com.auction.auction_backend.modules.bidding.entity.AutoBidMax;
 import com.auction.auction_backend.modules.bidding.entity.Bid;
+import com.auction.auction_backend.modules.bidding.repository.AutoBidRepository;
 import com.auction.auction_backend.modules.bidding.repository.BidRepository;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
@@ -22,32 +24,31 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class BidServiceImpl implements BidService {
-    private final BidRepository bidRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final AutoBidRepository autoBidRepository;
+    private final AutoBidService autoBidService;
 
     @Override
     public void placeBid(PlaceBidRequest request) {
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User bidder = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        validateBid(product, bidder, request.getAmount());
-        Bid bid = Bid.builder()
-                .product(product)
-                .bidder(bidder)
-                .bidAmount(request.getAmount())
-                .maxAmount(request.getAmount())
-                .bidType("MANUAL")
-                .build();
-        bidRepository.save(bid);
+        if (product.getStatus() != ProductStatus.ACTIVE) throw new AppException(ErrorCode.AUCTION_ENDED);
 
-        product.setCurrentPrice(request.getAmount());
-        product.setCurrentWinner(bidder);
-        productRepository.save(product);
-    }
+        AutoBidMax autoBid = autoBidRepository.findByProductAndBidder(product, bidder)
+                .orElse(AutoBidMax.builder()
+                        .product(product)
+                        .bidder(bidder)
+                        .build());
+        if (autoBid.getMaxAmount() == null || request.getAmount().compareTo(autoBid.getMaxAmount()) > 0) {
+            autoBid.setMaxAmount(request.getAmount());
+            autoBidRepository.save(autoBid);
+        }
+        autoBidService.triggerAutoBid(product);
+}
 
     private void validateBid(Product product, User bidder, BigDecimal bidAmount) {
         if (product.getStatus() != ProductStatus.ACTIVE) {
