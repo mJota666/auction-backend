@@ -2,9 +2,12 @@ package com.auction.auction_backend.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.time.LocalDateTime;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -43,5 +46,18 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return ResponseEntity.internalServerError().body(response);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleConcurrencyError(ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(409)
+                .code(4009)
+                .message("Giá sản phẩm vừa được cập nhật bởi người khác. Vui lòng thử lại")
+                .path(request.getRequestURI())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(409).body(response);
     }
 }
