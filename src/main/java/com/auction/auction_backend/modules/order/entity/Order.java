@@ -2,7 +2,7 @@ package com.auction.auction_backend.modules.order.entity;
 
 
 import com.auction.auction_backend.common.enums.OrderStatus;
-import com.auction.auction_backend.common.enums.PaymentMehod;
+import com.auction.auction_backend.common.enums.PaymentMethod;
 import com.auction.auction_backend.common.persistence.entity.BaseEntity;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.user.entity.User;
@@ -48,7 +48,7 @@ public class Order extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
-    private PaymentMehod paymentMethod;
+    private PaymentMethod paymentMethod;
 
     @Column(name = "payment_ref_id")
     private String paymentRefId;

@@ -22,7 +22,9 @@ public enum ErrorCode {
     // 4. Lỗi Đấu giá (Bidding)
     BID_AMOUNT_INVALID(3001, "Giá đặt không hợp lệ", HttpStatus.BAD_REQUEST),
     AUCTION_ENDED(3002, "Phiên đấu giá đã kết thúc", HttpStatus.BAD_REQUEST),
-    SELF_BIDDING(3003, "Không thể tự đấu giá sản phẩm của mình", HttpStatus.BAD_REQUEST);
+    SELF_BIDDING(3003, "Không thể tự đấu giá sản phẩm của mình", HttpStatus.BAD_REQUEST),
+
+    ORDER_NOT_FOUND(4001, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND);
 
     private final int code;
     private final String message;

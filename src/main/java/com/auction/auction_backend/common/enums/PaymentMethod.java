@@ -1,10 +1,7 @@
 package com.auction.auction_backend.common.enums;
 
-public enum PaymentMehod {
+public enum PaymentMethod {
     COD,
-    MOMO,
-    VNPAY,
-    ZALOPAY,
     PAYPAL,
     STRIPE,
     OTHER
