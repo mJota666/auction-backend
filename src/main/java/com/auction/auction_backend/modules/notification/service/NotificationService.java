@@ -41,14 +41,17 @@ public class NotificationService {
                 .build();
         notificationRepository.save(notification);
 
-        SseEmitter emitter = emitters.get(receiver.getId());
+        Long rid = receiver.getId();
+        SseEmitter emitter = emitters.get(rid);
+
+        log.info("Send notif -> receiverId={}, hasEmitter={}, emittersSize={}",
+                rid, emitter != null, emitters.size());
         if (emitter != null) {
             try {
-                emitter.send(SseEmitter.event()
-                        .name("notification")
-                        .data(notification));
+                emitter.send(SseEmitter.event().name("notification").data(notification));
             } catch (IOException e) {
-                emitters.remove(receiver.getId());
+                log.warn("SSE send failed, remove emitter for userId={}", rid, e);
+                emitters.remove(rid);
             }
         }
     }
