@@ -1,5 +1,6 @@
 package com.auction.auction_backend.modules.bidding.entity;
 
+import com.auction.auction_backend.common.enums.BidType;
 import com.auction.auction_backend.common.persistence.entity.BaseEntity;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.user.entity.User;
@@ -27,10 +28,8 @@ public class Bid extends BaseEntity {
     @Column(name = "bid_amount", nullable = false)
     private BigDecimal bidAmount;
 
-    @Column(name = "max_amount", nullable = false)
-    private BigDecimal maxAmount;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "bid_type", nullable = false)
     @Builder.Default
-    private String bidType = "MANUAL";
+    private BidType bidType = BidType.AUTO;
 }

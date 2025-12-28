@@ -17,6 +17,7 @@ import com.auction.auction_backend.security.userdetail.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,44 +25,58 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class BidServiceImpl implements BidService {
+
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final AutoBidRepository autoBidRepository;
     private final AutoBidService autoBidService;
 
     @Override
+    @Transactional
     public void placeBid(PlaceBidRequest request) {
         UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User bidder = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        if (product.getStatus() != ProductStatus.ACTIVE) throw new AppException(ErrorCode.AUCTION_ENDED);
+
+        validateBid(product, bidder, request.getAmount());
 
         AutoBidMax autoBid = autoBidRepository.findByProductAndBidder(product, bidder)
                 .orElse(AutoBidMax.builder()
                         .product(product)
                         .bidder(bidder)
+                        .maxAmount(BigDecimal.ZERO)
                         .build());
-        if (autoBid.getMaxAmount() == null || request.getAmount().compareTo(autoBid.getMaxAmount()) > 0) {
+
+        if (request.getAmount().compareTo(autoBid.getMaxAmount()) > 0) {
             autoBid.setMaxAmount(request.getAmount());
             autoBidRepository.save(autoBid);
         }
-        autoBidService.triggerAutoBid(product);
-}
 
-    private void validateBid(Product product, User bidder, BigDecimal bidAmount) {
+        autoBidService.triggerAutoBid(product);
+    }
+
+    private void validateBid(Product product, User bidder, BigDecimal inputMaxAmount) {
         if (product.getStatus() != ProductStatus.ACTIVE) {
-            throw new AppException(ErrorCode.BID_AMOUNT_INVALID);
-        }
-        if (LocalDateTime.now().isAfter(product.getEndAt())) {
             throw new AppException(ErrorCode.AUCTION_ENDED);
         }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(product.getEndAt())) {
+            throw new AppException(ErrorCode.AUCTION_ENDED);
+        }
+        if (now.isBefore(product.getStartAt())) {
+            throw new RuntimeException("Phiên đấu giá chưa bắt đầu");
+        }
+
         if (product.getSeller().getId().equals(bidder.getId())) {
             throw new AppException(ErrorCode.SELF_BIDDING);
         }
+
         BigDecimal minValidPrice = product.getCurrentPrice().add(product.getStepPrice());
-        if (bidAmount.compareTo(minValidPrice) < 0) {
+        if (inputMaxAmount.compareTo(minValidPrice) < 0) {
             throw new AppException(ErrorCode.BID_AMOUNT_INVALID);
         }
     }

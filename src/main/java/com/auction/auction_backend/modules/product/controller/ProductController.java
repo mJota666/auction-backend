@@ -1,8 +1,10 @@
 package com.auction.auction_backend.modules.product.controller;
 
 import com.auction.auction_backend.common.api.BaseResponse;
+import com.auction.auction_backend.modules.bidding.dto.response.BidHistoryResponse;
 import com.auction.auction_backend.modules.product.dto.request.CreateProductRequest;
 import com.auction.auction_backend.modules.product.dto.request.ProductSearchCriteria;
+import com.auction.auction_backend.modules.product.dto.response.ProductDetailResponse;
 import com.auction.auction_backend.modules.product.dto.response.ProductResponse;
 import com.auction.auction_backend.modules.product.service.impl.ProductService;
 import jakarta.validation.Valid;
@@ -43,5 +45,14 @@ public class ProductController {
     @GetMapping("/top/most-bids")
     public ResponseEntity<BaseResponse<List<ProductResponse>>> getTopMostBids() {
         return ResponseEntity.ok(BaseResponse.success(productService.getTop5MostBids()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BaseResponse<ProductDetailResponse>> getProductDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(BaseResponse.success(productService.getProductDetail(id)));
+    }
+    @GetMapping("/{id}/bids")
+    public ResponseEntity<BaseResponse<List<BidHistoryResponse>>> getProductBids(@PathVariable Long id) {
+        return ResponseEntity.ok(BaseResponse.success(productService.getProductBidHistory(id)));
     }
 }

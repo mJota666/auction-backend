@@ -20,4 +20,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' ORDER BY SIZE(p.bids) DESC")
     List<Product> findTopMostBidded(Pageable pageable);
+
+    List<Product> findTop5ByCategoryIdAndIdNotAndStatus(Long categoryId, Long productId, ProductStatus status);
 }

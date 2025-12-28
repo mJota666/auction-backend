@@ -4,8 +4,10 @@ import com.auction.auction_backend.common.enums.ProductStatus;
 import com.auction.auction_backend.common.exception.AppException;
 import com.auction.auction_backend.common.exception.ErrorCode;
 import com.auction.auction_backend.common.utils.AppUtils;
+import com.auction.auction_backend.modules.bidding.dto.response.BidHistoryResponse;
 import com.auction.auction_backend.modules.product.dto.request.CreateProductRequest;
 import com.auction.auction_backend.modules.product.dto.request.ProductSearchCriteria;
+import com.auction.auction_backend.modules.product.dto.response.ProductDetailResponse;
 import com.auction.auction_backend.modules.product.dto.response.ProductResponse;
 import com.auction.auction_backend.modules.product.entity.Category;
 import com.auction.auction_backend.modules.product.entity.Product;
@@ -112,6 +114,36 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findTopMostBidded(PageRequest.of(0,5))
                 .stream()
                 .map(ProductResponse::fromEntity)
+                .toList();
+    }
+
+    @Override
+    public ProductDetailResponse getProductDetail(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        List<Product> relatedEntities = productRepository.findTop5ByCategoryIdAndIdNotAndStatus(
+                product.getCategory().getId(),
+                product.getId(),
+                ProductStatus.ACTIVE
+        );
+
+        List<ProductResponse> relatedDTOs = relatedEntities.stream()
+                .map(ProductResponse::fromEntity)
+                .toList();
+
+        return ProductDetailResponse.fromEntity(product, relatedDTOs);
+    }
+
+    @Override
+    public List<BidHistoryResponse> getProductBidHistory(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (product.getBids() == null) return List.of();
+
+        return product.getBids().stream()
+                .sorted((b1, b2) -> b2.getBidAmount().compareTo(b1.getBidAmount())) // Sắp xếp giá giảm dần
+                .map(BidHistoryResponse::fromEntity)
                 .toList();
     }
 }

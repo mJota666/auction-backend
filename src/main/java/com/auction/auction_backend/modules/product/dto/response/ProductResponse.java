@@ -4,12 +4,13 @@ import com.auction.auction_backend.common.enums.ProductStatus;
 import com.auction.auction_backend.modules.product.entity.Product;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@SuperBuilder
 public class ProductResponse {
     private Long id;
     private String title;
