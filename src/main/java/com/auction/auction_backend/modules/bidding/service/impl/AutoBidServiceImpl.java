@@ -4,6 +4,7 @@ import com.auction.auction_backend.modules.bidding.entity.AutoBidMax;
 import com.auction.auction_backend.modules.bidding.entity.Bid;
 import com.auction.auction_backend.modules.bidding.repository.AutoBidRepository;
 import com.auction.auction_backend.modules.bidding.repository.BidRepository;
+import com.auction.auction_backend.modules.notification.service.NotificationService;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
 import com.auction.auction_backend.modules.user.entity.User;
@@ -22,6 +23,7 @@ public class AutoBidServiceImpl implements AutoBidService {
     private final AutoBidRepository autoBidRepository;
     private final ProductRepository productRepository;
     private final BidRepository bidRepository;
+    private final NotificationService notificationService;
     @Override
     @Transactional
     public void triggerAutoBid(Product product) {
@@ -62,10 +64,26 @@ public class AutoBidServiceImpl implements AutoBidService {
         }
     }
 
-    private void updateProduct(Product product, User winner, BigDecimal price) {
-        product.setCurrentPrice(price);
-        product.setCurrentWinner(winner);
+    private void updateProduct(Product product, User newWinner, BigDecimal newPrice) {
+        User oldWinner = product.getCurrentWinner();
+
+        if (oldWinner != null && !oldWinner.getId().equals(newWinner.getId())) {
+            try {
+                notificationService.sendNotification(
+                        oldWinner,
+                        "Bạn đã bị vượt mặt!",
+                        "Sản phẩm '" + product.getTitle() + "' vừa có người đặt giá cao hơn: " + newPrice,
+                        "/products/" + product.getId(), // Link tới sản phẩm
+                        "OUTBID"
+                );
+            } catch (Exception e) {
+                log.error("Lỗi gửi thông báo: {}", e.getMessage());
+            }
+        }
+
+        product.setCurrentPrice(newPrice);
+        product.setCurrentWinner(newWinner);
         productRepository.save(product);
-        log.info("Product {} - New Price: {} - Winner: {}", product.getId(), price, winner.getEmail());
+        log.info("Product {} - New Price: {} - Winner: {}", product.getId(), newPrice, newWinner.getEmail());
     }
 }

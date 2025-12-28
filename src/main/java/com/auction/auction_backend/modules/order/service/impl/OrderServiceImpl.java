@@ -2,6 +2,7 @@ package com.auction.auction_backend.modules.order.service.impl;
 
 import com.auction.auction_backend.common.enums.OrderStatus;
 import com.auction.auction_backend.common.enums.ProductStatus;
+import com.auction.auction_backend.modules.notification.service.NotificationService;
 import com.auction.auction_backend.modules.order.entity.Order;
 import com.auction.auction_backend.modules.order.repository.OrderRepository;
 import com.auction.auction_backend.modules.product.entity.Product;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final NotificationService notificationService;
     @Override
     public void createOrderFromAuction(Product product) {
         if (product.getStatus() != ProductStatus.ACTIVE) return;
@@ -36,5 +38,12 @@ public class OrderServiceImpl implements OrderService {
                 .shippingAddress(product.getCurrentWinner().getAddress())
                 .build();
         orderRepository.save(order);
+        notificationService.sendNotification(
+                order.getWinner(),
+                "Chúc mừng chiến thắng!",
+                "Bạn đã thắng đấu giá sản phẩm '" + product.getTitle() + "'. Vui lòng thanh toán ngay.",
+                "/orders/buying", // Link dẫn tới trang đơn hàng
+                "WIN"
+        );
         log.info("Auction success! Created Order ID {} for Product ID {}", order.getId(), product.getId());    }
 }

@@ -2,6 +2,7 @@ package com.auction.auction_backend.modules.payment.controller;
 
 import com.auction.auction_backend.common.enums.OrderStatus;
 import com.auction.auction_backend.common.enums.PaymentMethod;
+import com.auction.auction_backend.modules.notification.service.NotificationService;
 import com.auction.auction_backend.modules.order.entity.Order;
 import com.auction.auction_backend.modules.order.repository.OrderRepository;
 import com.stripe.model.Event;
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 public class StripeWebhookController {
     @Value("${stripe.webhook-secret}")
     private String webhookSecret;
-
+    private final NotificationService notificationService;
     private final OrderRepository orderRepository;
 
     @PostMapping
@@ -56,6 +57,13 @@ public class StripeWebhookController {
                     order.setPaymentRefId(paymentIntent.getId());
 
                     orderRepository.save(order);
+                    notificationService.sendNotification(
+                            order.getWinner(),
+                            "Thanh toán thành công",
+                            "Đơn hàng '" + order.getProduct().getTitle() + "' đã được xác nhận thanh toán.",
+                            "/orders/buying",
+                            "PAYMENT_SUCCESS"
+                    );
                 }
             }
         }
