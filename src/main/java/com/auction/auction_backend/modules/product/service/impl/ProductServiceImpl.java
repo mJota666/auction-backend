@@ -90,4 +90,28 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = productRepository.findAll(spec, pageable);
         return productPage.map(ProductResponse::fromEntity);
     }
+
+    @Override
+    public List<ProductResponse> getTop5EndingSoon() {
+        return productRepository.findTop5ByStatusOrderByEndAtAsc(ProductStatus.ACTIVE)
+                .stream()
+                .map(ProductResponse::fromEntity)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponse> getTop5HighestPrice() {
+        return productRepository.findTop5ByStatusOrderByCurrentPriceDesc(ProductStatus.ACTIVE)
+                .stream()
+                .map(ProductResponse::fromEntity)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponse> getTop5MostBids() {
+        return productRepository.findTopMostBidded(PageRequest.of(0,5))
+                .stream()
+                .map(ProductResponse::fromEntity)
+                .toList();
+    }
 }

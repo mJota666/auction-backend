@@ -19,16 +19,28 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "products")
+public class Product extends BaseEntity { // BaseEntity đã có id, created_at, updated_at, version
 
-public class Product extends BaseEntity {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "title_normalized")
+    @Column(name = "title_normalized", nullable = false)
     private String titleNormalized;
 
-    @Column(name = "description_html", columnDefinition = "LONGTEXT")
+    // Mapping đúng với cột description_html trong DB
+    @Column(name = "description_html", nullable = false, columnDefinition = "LONGTEXT")
     private String description;
+
+    @Column(name = "description_append_log", columnDefinition = "LONGTEXT")
+    private String descriptionAppendLog;
 
     @Column(name = "start_price", nullable = false)
     private BigDecimal startPrice;
@@ -39,8 +51,12 @@ public class Product extends BaseEntity {
     @Column(name = "buy_now_price")
     private BigDecimal buyNowPrice;
 
-    @Column(name = "current_price")
+    @Column(name = "current_price", nullable = false)
     private BigDecimal currentPrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_winner_id")
+    private User currentWinner;
 
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt;
@@ -48,26 +64,22 @@ public class Product extends BaseEntity {
     @Column(name = "end_at", nullable = false)
     private LocalDateTime endAt;
 
+    // Mapping cột tinyint(1) sang boolean
+    @Column(name = "allow_unrated_bidder", nullable = false)
+    private boolean allowUnratedBidder = false;
+
+    @Column(name = "auto_extend_enabled", nullable = false)
+    private boolean autoExtendEnabled = false;
+
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private ProductStatus status = ProductStatus.ACTIVE;
+    @Column(nullable = false)
+    private ProductStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
-    private User seller;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "current_winner_id")
-    private User currentWinner;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<ProductImage> images = new ArrayList<>();
-
+    // Quan hệ OneToMany ảo (như đã giải thích bài trước)
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Bid> bids;
+
+    // Quan hệ ảnh (Giả sử bạn có bảng product_images)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductImage> images;
 }

@@ -13,16 +13,25 @@ import java.time.LocalDateTime;
 public class ProductResponse {
     private Long id;
     private String title;
-    private String description;
+    private String description; // description_html
+
     private BigDecimal startPrice;
     private BigDecimal currentPrice;
     private BigDecimal buyNowPrice;
     private BigDecimal stepPrice;
+
+    private LocalDateTime startAt;
     private LocalDateTime endAt;
     private LocalDateTime createdAt;
-    private String thumbnailUrl;
+
+    private boolean autoExtendEnabled;
+    private boolean allowUnratedBidder;
+
     private String categoryName;
+    private String thumbnailUrl;
     private ProductStatus status;
+
+    private String sellerName;
     private String currentWinnerName;
     private int bidCount;
 
@@ -34,10 +43,14 @@ public class ProductResponse {
 
         String winnerName = null;
         if (product.getCurrentWinner() != null) {
+            // Mask tên: "Nguyễn Văn A" -> "****n Văn A" hoặc logic tùy ý
             winnerName = product.getCurrentWinner().getFullName();
         }
 
+        String sellerName = (product.getSeller() != null) ? product.getSeller().getFullName() : "Unknown";
+
         int totalBids = (product.getBids() != null) ? product.getBids().size() : 0;
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .title(product.getTitle())
@@ -46,11 +59,15 @@ public class ProductResponse {
                 .currentPrice(product.getCurrentPrice())
                 .buyNowPrice(product.getBuyNowPrice())
                 .stepPrice(product.getStepPrice())
+                .startAt(product.getStartAt())
                 .endAt(product.getEndAt())
                 .createdAt(product.getCreatedAt())
+                .autoExtendEnabled(product.isAutoExtendEnabled())
+                .allowUnratedBidder(product.isAllowUnratedBidder())
                 .thumbnailUrl(thumb)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.getStatus())
+                .sellerName(sellerName)
                 .currentWinnerName(winnerName)
                 .bidCount(totalBids)
                 .build();

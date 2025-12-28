@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
@@ -27,4 +29,19 @@ public class ProductController {
     public ResponseEntity<BaseResponse<String>> createProduct(@RequestBody @Valid CreateProductRequest request) {
         productService.createProduct(request);
         return ResponseEntity.ok(BaseResponse.success("Tạo sản phẩm đấu giá thành công"));    }
+
+    @GetMapping("/top/ending-soon")
+    public ResponseEntity<BaseResponse<List<ProductResponse>>> getTopEndingSoon() {
+        return ResponseEntity.ok(BaseResponse.success(productService.getTop5EndingSoon()));
+    }
+
+    @GetMapping("/top/highest-price")
+    public ResponseEntity<BaseResponse<List<ProductResponse>>> getTopHighestPrice() {
+        return ResponseEntity.ok(BaseResponse.success(productService.getTop5HighestPrice()));
+    }
+
+    @GetMapping("/top/most-bids")
+    public ResponseEntity<BaseResponse<List<ProductResponse>>> getTopMostBids() {
+        return ResponseEntity.ok(BaseResponse.success(productService.getTop5MostBids()));
+    }
 }
