@@ -2,6 +2,7 @@ package com.auction.auction_backend.modules.product.entity;
 
 import com.auction.auction_backend.common.enums.ProductStatus;
 import com.auction.auction_backend.common.persistence.entity.BaseEntity;
+import com.auction.auction_backend.modules.bidding.entity.Bid;
 import com.auction.auction_backend.modules.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -66,4 +67,7 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ProductImage> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<Bid> bids;
 }

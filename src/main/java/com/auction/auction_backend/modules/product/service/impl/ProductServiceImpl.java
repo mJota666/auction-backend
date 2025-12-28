@@ -3,16 +3,25 @@ package com.auction.auction_backend.modules.product.service.impl;
 import com.auction.auction_backend.common.enums.ProductStatus;
 import com.auction.auction_backend.common.exception.AppException;
 import com.auction.auction_backend.common.exception.ErrorCode;
+import com.auction.auction_backend.common.utils.AppUtils;
 import com.auction.auction_backend.modules.product.dto.request.CreateProductRequest;
+import com.auction.auction_backend.modules.product.dto.request.ProductSearchCriteria;
+import com.auction.auction_backend.modules.product.dto.response.ProductResponse;
 import com.auction.auction_backend.modules.product.entity.Category;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.entity.ProductImage;
 import com.auction.auction_backend.modules.product.repository.CategoryRepository;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
+import com.auction.auction_backend.modules.product.repository.spec.ProductSpecification;
 import com.auction.auction_backend.modules.user.entity.User;
 import com.auction.auction_backend.modules.user.repository.UserRepository;
 import com.auction.auction_backend.security.userdetail.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = Product.builder()
                 .title(request.getTitle())
-                .titleNormalized(request.getTitle().toLowerCase(Locale.ROOT))
+                .titleNormalized(AppUtils.removeAccent(request.getTitle()))
                 .description(request.getDescription())
                 .startPrice(request.getStartPrice())
                 .currentPrice(request.getStartPrice())
@@ -64,5 +73,21 @@ public class ProductServiceImpl implements ProductService {
             product.setImages(images);
         }
         productRepository.save(product);
+    }
+
+    @Override
+    public Page<ProductResponse> searchProducts(ProductSearchCriteria criteria) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt"); // Mặc định là mới nhất
+        if (criteria.getSortBy() != null) {
+            switch (criteria.getSortBy()) {
+                case "price_asc" -> sort = Sort.by(Sort.Direction.ASC, "currentPrice");
+                case "price_desc" -> sort = Sort.by(Sort.Direction.DESC, "currentPrice");
+                case "end_at_asc" -> sort = Sort.by(Sort.Direction.ASC, "endAt"); // Sắp hết hạn lên đầu
+            }
+        }
+        Pageable pageable = PageRequest.of(criteria.getPage(), criteria.getSize(), sort);
+        Specification<Product> spec = ProductSpecification.getSpecification(criteria);
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+        return productPage.map(ProductResponse::fromEntity);
     }
 }
