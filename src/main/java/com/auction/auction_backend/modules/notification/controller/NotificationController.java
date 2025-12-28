@@ -8,9 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
@@ -29,6 +27,30 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<BaseResponse<List<Notification>>> getHistory(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(BaseResponse.success(notificationService.getMyNotifications(userPrincipal.getId())));
+    }
+
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<BaseResponse<String>> markAsRead(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        notificationService.markAsRead(id, userPrincipal.getId());
+        return ResponseEntity.ok(BaseResponse.success("Đã đánh dấu đã đọc"));
+    }
+
+    @PatchMapping("/read-all")
+    public ResponseEntity<BaseResponse<String>> markAllAsRead(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        notificationService.markAllAsRead(userPrincipal.getId());
+        return ResponseEntity.ok(BaseResponse.success("Đã đánh dấu tất cả là đang đọc"));
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<BaseResponse<Long>> getUnreadCount(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        return ResponseEntity.ok(BaseResponse.success(notificationService.countUnread(userPrincipal.getId())));
     }
 
 }

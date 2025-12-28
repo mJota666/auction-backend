@@ -59,4 +59,25 @@ public class NotificationService {
     public List<Notification> getMyNotifications(Long userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    public void markAsRead(Long notificationId, long userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Thông báo không tồn tại"));
+        if (!notification.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền này");
+        }
+        notification.setRead(true);
+        notificationRepository.save(notification);
+    }
+
+    public void markAllAsRead(Long userId) {
+        List<Notification> unreadList = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream().filter(n -> !n.isRead()).toList();
+        unreadList.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(unreadList);
+    }
+
+    public long countUnread(Long userId) {
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
 }
