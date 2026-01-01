@@ -1,6 +1,6 @@
 package com.auction.auction_backend.scheduling;
 
-import com.auction.auction_backend.modules.order.service.impl.OrderService;
+import com.auction.auction_backend.modules.order.service.OrderService;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -25,7 +25,8 @@ public class AuctionScheduler {
 
         log.info("Scanning for expired auctions...");
         List<Product> expiredProducts = productRepository.findExpiredAuctions(LocalDateTime.now());
-        if (expiredProducts.isEmpty()) return;
+        if (expiredProducts.isEmpty())
+            return;
         log.info("Found {} expired auctions.", expiredProducts.size());
         for (Product product : expiredProducts) {
             try {
