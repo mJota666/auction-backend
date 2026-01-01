@@ -19,12 +19,15 @@ public class ProductSpecification {
             if (criteria.getKeyword() != null && !criteria.getKeyword().isEmpty()) {
                 String keywordLike = "%" + criteria.getKeyword().toLowerCase() + "%";
                 Predicate titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), keywordLike);
-                Predicate normalizedTitlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("titleNormalized")), keywordLike);
+                Predicate normalizedTitlePredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("titleNormalized")), keywordLike);
 
                 predicates.add(criteriaBuilder.or(titlePredicate, normalizedTitlePredicate));
             }
 
-            if (criteria.getCategoryId() != null) {
+            if (criteria.getCategoryIds() != null && !criteria.getCategoryIds().isEmpty()) {
+                predicates.add(root.get("category").get("id").in(criteria.getCategoryIds()));
+            } else if (criteria.getCategoryId() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("category").get("id"), criteria.getCategoryId()));
             }
 
