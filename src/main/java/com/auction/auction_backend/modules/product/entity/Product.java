@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "products")
-public class Product extends BaseEntity { // BaseEntity đã có id, created_at, updated_at, version
+public class Product extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
@@ -35,7 +35,6 @@ public class Product extends BaseEntity { // BaseEntity đã có id, created_at,
     @Column(name = "title_normalized", nullable = false)
     private String titleNormalized;
 
-    // Mapping đúng với cột description_html trong DB
     @Column(name = "description_html", nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
@@ -64,7 +63,6 @@ public class Product extends BaseEntity { // BaseEntity đã có id, created_at,
     @Column(name = "end_at", nullable = false)
     private LocalDateTime endAt;
 
-    // Mapping cột tinyint(1) sang boolean
     @Column(name = "allow_unrated_bidder", nullable = false)
     private boolean allowUnratedBidder = false;
 
@@ -75,11 +73,9 @@ public class Product extends BaseEntity { // BaseEntity đã có id, created_at,
     @Column(nullable = false)
     private ProductStatus status;
 
-    // Quan hệ OneToMany ảo (như đã giải thích bài trước)
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Bid> bids;
 
-    // Quan hệ ảnh (Giả sử bạn có bảng product_images)
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images;
 }
