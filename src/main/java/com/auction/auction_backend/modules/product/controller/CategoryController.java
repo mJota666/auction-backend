@@ -42,4 +42,9 @@ public class CategoryController {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok(BaseResponse.success("Xóa danh mục thành công"));
     }
+
+    @GetMapping("/categories/{id}/children")
+    public ResponseEntity<BaseResponse<List<Category>>> getChildCategories(@PathVariable Long id) {
+        return ResponseEntity.ok(BaseResponse.success(categoryService.getChildCategories(id)));
+    }
 }

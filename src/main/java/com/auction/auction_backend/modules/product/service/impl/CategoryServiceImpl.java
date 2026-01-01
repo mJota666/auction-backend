@@ -1,7 +1,5 @@
 package com.auction.auction_backend.modules.product.service.impl;
 
-import com.auction.auction_backend.common.exception.AppException;
-import com.auction.auction_backend.common.exception.ErrorCode;
 import com.auction.auction_backend.modules.product.entity.Category;
 import com.auction.auction_backend.modules.product.repository.CategoryRepository;
 import com.auction.auction_backend.modules.product.service.CategoryService;
@@ -44,5 +42,10 @@ public class CategoryServiceImpl implements CategoryService {
             throw new RuntimeException("Danh mục không tồn tại");
         }
         categoryRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Category> getChildCategories(Long parentId) {
+        return categoryRepository.findAllByParentId(parentId);
     }
 }
