@@ -44,6 +44,9 @@ public class User extends BaseEntity {
     @Builder.Default
     private int ratingNegative = 0;
 
+    @Column(name = "verification_code")
+    private String verificationCode;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_favorite_products", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
     private java.util.Set<com.auction.auction_backend.modules.product.entity.Product> favoriteProducts = new java.util.HashSet<>();

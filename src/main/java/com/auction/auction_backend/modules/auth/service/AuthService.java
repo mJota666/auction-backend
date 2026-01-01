@@ -24,6 +24,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final com.auction.auction_backend.modules.notification.service.EmailService emailService;
 
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
@@ -48,14 +49,50 @@ public class AuthService {
             throw new RuntimeException("Email đã tồn tại");
         }
 
+        // Generate 6 digit OTP
+        String otp = String.valueOf((int) ((Math.random() * 900000) + 100000));
+        System.out.println("======================================");
+        System.out.println("OTP for " + request.getEmail() + ": " + otp);
+        System.out.println("======================================");
+
+        // Send OTP via Email
+        emailService.sendEmail(request.getEmail(), "Account Verification - Auction App", "Your OTP is: " + otp);
+
         User user = User.builder()
                 .fullName(request.getFullname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(UserRole.BIDDER)
-                .active(true)
+                .active(false) // Deactive until verify
+                .verificationCode(otp)
                 .build();
 
         userRepository.save(user);
+    }
+
+    public AuthResponse verify(com.auction.auction_backend.modules.auth.dto.request.VerifyRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.isActive()) {
+            throw new RuntimeException("User already active");
+        }
+
+        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(request.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        user.setActive(true);
+        user.setVerificationCode(null);
+        userRepository.save(user);
+
+        // Auto login after verify
+        return AuthResponse.builder()
+                .token(jwtUtils.generateTokenFromUsername(user.getEmail())) // Simplified for now
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullname(user.getFullName())
+                .role(user.getRole().name())
+                .build();
     }
 }

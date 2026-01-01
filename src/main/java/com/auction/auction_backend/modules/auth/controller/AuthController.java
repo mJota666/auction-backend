@@ -18,14 +18,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+
     @PostMapping("/register")
     public ResponseEntity<BaseResponse<String>> register(@RequestBody @Valid RegisterRequest request) {
         authService.register(request);
         return ResponseEntity.ok(BaseResponse.success("Đăng ký thành công"));
     }
+
     @PostMapping("/login")
     public ResponseEntity<BaseResponse<AuthResponse>> login(@RequestBody @Valid LoginRequest request) {
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(BaseResponse.success(response));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<BaseResponse<AuthResponse>> verify(
+            @RequestBody @Valid com.auction.auction_backend.modules.auth.dto.request.VerifyRequest request) {
+        AuthResponse response = authService.verify(request);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
 }
