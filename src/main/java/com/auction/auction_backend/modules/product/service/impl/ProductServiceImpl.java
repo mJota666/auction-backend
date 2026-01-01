@@ -41,7 +41,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void createProduct(CreateProductRequest request) {
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         User seller = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -111,7 +112,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponse> getTop5MostBids() {
-        return productRepository.findTopMostBidded(PageRequest.of(0,5))
+        return productRepository.findTopMostBidded(PageRequest.of(0, 5))
                 .stream()
                 .map(ProductResponse::fromEntity)
                 .toList();
@@ -125,8 +126,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> relatedEntities = productRepository.findTop5ByCategoryIdAndIdNotAndStatus(
                 product.getCategory().getId(),
                 product.getId(),
-                ProductStatus.ACTIVE
-        );
+                ProductStatus.ACTIVE);
 
         List<ProductResponse> relatedDTOs = relatedEntities.stream()
                 .map(ProductResponse::fromEntity)
@@ -139,11 +139,33 @@ public class ProductServiceImpl implements ProductService {
     public List<BidHistoryResponse> getProductBidHistory(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        if (product.getBids() == null) return List.of();
+        if (product.getBids() == null)
+            return List.of();
 
         return product.getBids().stream()
                 .sorted((b1, b2) -> b2.getBidAmount().compareTo(b1.getBidAmount())) // Sắp xếp giá giảm dần
                 .map(BidHistoryResponse::fromEntity)
                 .toList();
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void appendDescription(Long productId, String content) {
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (!product.getSeller().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Bạn không phải là người bán của sản phẩm này");
+        }
+
+        String newDescription = product.getDescription() +
+                "\n\n<p><strong>[Cập nhật ngày "
+                + java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").format(java.time.LocalDateTime.now())
+                + "]:</strong> " + content + "</p>";
+
+        product.setDescription(newDescription);
+        productRepository.save(product);
     }
 }

@@ -32,4 +32,7 @@ public class Bid extends BaseEntity {
     @Column(name = "bid_type", nullable = false)
     @Builder.Default
     private BidType bidType = BidType.AUTO;
+
+    @Column(name = "max_amount")
+    private BigDecimal maxAmount;
 }

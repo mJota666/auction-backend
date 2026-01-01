@@ -14,12 +14,17 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' AND p.endAt < :now")
     List<Product> findExpiredAuctions(LocalDateTime now);
+
     Page<Product> findByStatus(ProductStatus status, Pageable pageable);
+
     List<Product> findTop5ByStatusOrderByEndAtAsc(ProductStatus status);
+
     List<Product> findTop5ByStatusOrderByCurrentPriceDesc(ProductStatus status);
 
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' ORDER BY SIZE(p.bids) DESC")
     List<Product> findTopMostBidded(Pageable pageable);
 
     List<Product> findTop5ByCategoryIdAndIdNotAndStatus(Long categoryId, Long productId, ProductStatus status);
+
+    long countByStatus(ProductStatus status);
 }

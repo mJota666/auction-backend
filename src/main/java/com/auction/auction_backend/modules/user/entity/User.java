@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
-    @Column(name = "full_name", nullable=false)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     @Column(nullable = false, unique = true)
@@ -44,4 +44,7 @@ public class User extends BaseEntity {
     @Builder.Default
     private int ratingNegative = 0;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_favorite_products", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private java.util.Set<com.auction.auction_backend.modules.product.entity.Product> favoriteProducts = new java.util.HashSet<>();
 }

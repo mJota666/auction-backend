@@ -1,6 +1,5 @@
 package com.auction.auction_backend.modules.order.entity;
 
-
 import com.auction.auction_backend.common.enums.OrderStatus;
 import com.auction.auction_backend.common.enums.PaymentMethod;
 import com.auction.auction_backend.common.persistence.entity.BaseEntity;
@@ -10,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,8 +18,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "orders")
 public class Order extends BaseEntity {
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false, unique = true)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,11 +39,11 @@ public class Order extends BaseEntity {
     @Builder.Default
     private OrderStatus status = OrderStatus.PENDING_PAYMENT;
 
-    @Column(name = "shipping_address", length = 1000)
+    @Column(name = "shipping_address")
     private String shippingAddress;
 
-    @Column(name = "shipping_tracking")
-    private String shippingTracking;
+    @Column(name = "paid_at")
+    private java.time.LocalDateTime paidAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
@@ -52,10 +51,4 @@ public class Order extends BaseEntity {
 
     @Column(name = "payment_ref_id")
     private String paymentRefId;
-
-    @Column(name = "paid_at")
-    private LocalDateTime paidAt;
-
-    @Column(name = "delivered_at")
-    private LocalDateTime deliveredAt;
 }

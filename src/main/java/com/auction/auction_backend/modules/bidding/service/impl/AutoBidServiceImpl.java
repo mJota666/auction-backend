@@ -24,12 +24,14 @@ public class AutoBidServiceImpl implements AutoBidService {
     private final ProductRepository productRepository;
     private final BidRepository bidRepository;
     private final NotificationService notificationService;
+
     @Override
     @Transactional
     public void triggerAutoBid(Product product) {
         List<AutoBidMax> ranking = autoBidRepository.findSortedBids(product.getId());
 
-        if (ranking.isEmpty()) return;
+        if (ranking.isEmpty())
+            return;
 
         if (ranking.size() == 1) {
             AutoBidMax winner = ranking.get(0);
@@ -49,7 +51,8 @@ public class AutoBidServiceImpl implements AutoBidService {
         }
 
         boolean priceChanged = newPrice.compareTo(product.getCurrentPrice()) != 0;
-        boolean winnerChanged = product.getCurrentWinner() == null || !product.getCurrentWinner().getId().equals(top1.getBidder().getId());
+        boolean winnerChanged = product.getCurrentWinner() == null
+                || !product.getCurrentWinner().getId().equals(top1.getBidder().getId());
 
         if (priceChanged || winnerChanged) {
             Bid bidHistory = Bid.builder()
@@ -57,7 +60,7 @@ public class AutoBidServiceImpl implements AutoBidService {
                     .bidder(top1.getBidder())
                     .bidAmount(newPrice)
                     .maxAmount(top1.getMaxAmount())
-                    .bidType("AUTO")
+                    .bidType(com.auction.auction_backend.common.enums.BidType.AUTO)
                     .build();
             bidRepository.save(bidHistory);
             updateProduct(product, top1.getBidder(), newPrice);
@@ -74,8 +77,7 @@ public class AutoBidServiceImpl implements AutoBidService {
                         "Bạn đã bị vượt mặt!",
                         "Sản phẩm '" + product.getTitle() + "' vừa có người đặt giá cao hơn: " + newPrice,
                         "/products/" + product.getId(), // Link tới sản phẩm
-                        "OUTBID"
-                );
+                        "OUTBID");
             } catch (Exception e) {
                 log.error("Lỗi gửi thông báo: {}", e.getMessage());
             }
