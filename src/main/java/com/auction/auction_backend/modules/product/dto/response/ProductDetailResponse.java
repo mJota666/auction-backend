@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 public class ProductDetailResponse extends ProductResponse {
     private List<String> imageUrls;
     private List<ProductResponse> relatedProducts;
+    private int sellerRatingPositive;
+    private int sellerRatingNegative;
 
     public static ProductDetailResponse fromEntity(Product product, List<ProductResponse> related) {
         String categoryName = (product.getCategory() != null) ? product.getCategory().getName() : "Uncategorized";
@@ -51,6 +53,8 @@ public class ProductDetailResponse extends ProductResponse {
                 .bidCount(product.getBids() != null ? product.getBids().size() : 0)
                 .imageUrls(images)
                 .relatedProducts(related)
+                .sellerRatingPositive(product.getSeller() != null ? product.getSeller().getRatingPositive() : 0)
+                .sellerRatingNegative(product.getSeller() != null ? product.getSeller().getRatingNegative() : 0)
                 .build();
     }
 }

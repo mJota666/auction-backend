@@ -27,8 +27,7 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateAccessToken(authentication);
 
@@ -38,9 +37,11 @@ public class AuthService {
                 .token(jwt)
                 .id(userDetails.getId())
                 .email(userDetails.getEmail())
-                .role(userDetails.getAuthorities().iterator().next().getAuthority())
+                .fullname(userDetails.getFullname())
+                .role(userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""))
                 .build();
     }
+
     @Transactional
     public void register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
