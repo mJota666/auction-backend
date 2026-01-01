@@ -56,7 +56,7 @@ public class AuthService {
         System.out.println("======================================");
 
         // Send OTP via Email
-        emailService.sendEmail(request.getEmail(), "Account Verification - Auction App", "Your OTP is: " + otp);
+        emailService.sendOtpEmail(request.getEmail(), otp);
 
         User user = User.builder()
                 .fullName(request.getFullname())
