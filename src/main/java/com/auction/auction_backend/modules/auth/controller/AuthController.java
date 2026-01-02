@@ -37,4 +37,11 @@ public class AuthController {
         AuthResponse response = authService.verify(request);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<BaseResponse<AuthResponse>> refreshToken(
+            @RequestBody @Valid com.auction.auction_backend.modules.auth.dto.request.RefreshTokenRequest request) {
+        AuthResponse response = authService.refreshToken(request);
+        return ResponseEntity.ok(BaseResponse.success(response));
+    }
 }

@@ -31,11 +31,13 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateAccessToken(authentication);
+        String refreshToken = jwtUtils.generateRefreshToken(authentication);
 
         UserPrincipal userDetails = (UserPrincipal) authentication.getPrincipal();
 
         return AuthResponse.builder()
                 .token(jwt)
+                .refreshToken(refreshToken)
                 .id(userDetails.getId())
                 .email(userDetails.getEmail())
                 .fullname(userDetails.getFullname())
@@ -91,6 +93,7 @@ public class AuthService {
         // Auto login after verify
         return AuthResponse.builder()
                 .token(jwtUtils.generateTokenFromUsername(user.getEmail())) // Simplified for now
+                .refreshToken(jwtUtils.generateRefreshTokenFromUsername(user.getEmail()))
                 .id(user.getId())
                 .email(user.getEmail())
                 .fullname(user.getFullName())
@@ -98,5 +101,30 @@ public class AuthService {
                 .ratingNegative(user.getRatingNegative())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    public AuthResponse refreshToken(com.auction.auction_backend.modules.auth.dto.request.RefreshTokenRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+        if (jwtUtils.validateJwtToken(requestRefreshToken)) {
+            String username = jwtUtils.getUserNameFromJwtToken(requestRefreshToken);
+            User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            String token = jwtUtils.generateTokenFromUsername(username);
+
+            return AuthResponse.builder()
+                    .token(token)
+                    .refreshToken(requestRefreshToken) // Keep old refresh token or rotate? For simplicity, keep it
+                                                       // until expired.
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .fullname(user.getFullName())
+                    .ratingPositive(user.getRatingPositive())
+                    .ratingNegative(user.getRatingNegative())
+                    .role(user.getRole().name())
+                    .build();
+        } else {
+            throw new RuntimeException("Refresh token is invalid or expired!");
+        }
     }
 }
