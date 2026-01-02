@@ -20,6 +20,8 @@ public class UserPrincipal implements UserDetails {
     @JsonIgnore
     private String password;
     private String fullname;
+    private int ratingPositive;
+    private int ratingNegative;
     private Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(User user) {
@@ -30,6 +32,8 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getPassword(),
                 user.getFullName(),
+                user.getRatingPositive(),
+                user.getRatingNegative(),
                 authorities);
     }
 

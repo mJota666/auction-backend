@@ -39,6 +39,8 @@ public class AuthService {
                 .id(userDetails.getId())
                 .email(userDetails.getEmail())
                 .fullname(userDetails.getFullname())
+                .ratingPositive(userDetails.getRatingPositive())
+                .ratingNegative(userDetails.getRatingNegative())
                 .role(userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""))
                 .build();
     }
@@ -92,6 +94,8 @@ public class AuthService {
                 .id(user.getId())
                 .email(user.getEmail())
                 .fullname(user.getFullName())
+                .ratingPositive(user.getRatingPositive())
+                .ratingNegative(user.getRatingNegative())
                 .role(user.getRole().name())
                 .build();
     }

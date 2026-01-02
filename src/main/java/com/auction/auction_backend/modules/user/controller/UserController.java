@@ -57,4 +57,12 @@ public class UserController {
         userService.toggleFavorite(currentUser.getId(), productId);
         return ResponseEntity.ok(BaseResponse.success("Cập nhật danh sách yêu thích thành công"));
     }
+
+    @PostMapping("/favorites")
+    public ResponseEntity<BaseResponse<String>> toggleFavoriteBody(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestBody @Valid com.auction.auction_backend.modules.user.dto.request.FavoriteRequest request) {
+        userService.toggleFavorite(currentUser.getId(), request.getProductId());
+        return ResponseEntity.ok(BaseResponse.success("Cập nhật danh sách yêu thích thành công"));
+    }
 }

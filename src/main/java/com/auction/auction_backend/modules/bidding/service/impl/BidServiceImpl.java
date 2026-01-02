@@ -34,7 +34,8 @@ public class BidServiceImpl implements BidService {
     @Override
     @Transactional
     public void placeBid(PlaceBidRequest request) {
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         User bidder = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -73,6 +74,16 @@ public class BidServiceImpl implements BidService {
 
         if (product.getSeller().getId().equals(bidder.getId())) {
             throw new AppException(ErrorCode.SELF_BIDDING);
+        }
+
+        // Check Rating Point (Block if < 80%)
+        // Only check if user has at least some ratings to avoid blocking new users
+        int totalRatings = bidder.getRatingPositive() + bidder.getRatingNegative();
+        if (totalRatings > 0) {
+            double ratingRatio = (double) bidder.getRatingPositive() / totalRatings;
+            if (ratingRatio < 0.8) {
+                throw new RuntimeException("Điểm tín nhiệm của bạn quá thấp (< 80%) để tham gia đấu giá.");
+            }
         }
 
         BigDecimal minValidPrice = product.getCurrentPrice().add(product.getStepPrice());
