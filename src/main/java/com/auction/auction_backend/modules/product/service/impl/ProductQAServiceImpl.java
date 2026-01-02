@@ -30,6 +30,7 @@ public class ProductQAServiceImpl implements ProductQAService {
         private final ProductQARepository productQARepository;
         private final ProductRepository productRepository;
         private final UserRepository userRepository;
+        private final com.auction.auction_backend.modules.notification.service.EmailService emailService;
 
         @Override
         @Transactional
@@ -51,7 +52,14 @@ public class ProductQAServiceImpl implements ProductQAService {
 
                 productQARepository.save(qa);
 
-                // TODO: Notification to Seller
+                // Send Email to Seller
+                String productLink = "http://localhost:5173/products/" + product.getId(); // TODO: Use config from
+                                                                                          // properties
+                emailService.sendQuestionNotification(
+                                product.getSeller().getEmail(),
+                                product.getTitle(),
+                                request.getQuestion(),
+                                productLink);
         }
 
         @Override
@@ -71,7 +79,15 @@ public class ProductQAServiceImpl implements ProductQAService {
                 qa.setAnswered(true);
                 productQARepository.save(qa);
 
-                // TODO: Notification to Asker
+                // Send Email to Asker
+                String productLink = "http://localhost:5173/products/" + qa.getProduct().getId(); // TODO: Use config
+                                                                                                  // from properties
+                emailService.sendAnswerNotification(
+                                qa.getAsker().getEmail(),
+                                qa.getProduct().getTitle(),
+                                qa.getQuestion(),
+                                request.getAnswer(),
+                                productLink);
         }
 
         @Override

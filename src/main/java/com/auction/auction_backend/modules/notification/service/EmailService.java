@@ -153,4 +153,89 @@ public class EmailService {
       log.error("Failed to send HTML email to {}", to, e);
     }
   }
+
+  @Async
+  public void sendQuestionNotification(String to, String productName, String question, String productLink) {
+    try {
+      jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+      org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(
+          message, true, "UTF-8");
+
+      helper.setTo(to);
+      helper.setSubject("Câu hỏi mới về sản phẩm: " + productName);
+
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h2 style="color: #333;">Bạn có câu hỏi mới!</h2>
+                  <p>Xin chào,</p>
+                  <p>Một khách hàng đã đặt câu hỏi về sản phẩm <b>%s</b> của bạn:</p>
+                  <blockquote style="background: #f9f9f9; border-left: 4px solid #007bff; margin: 10px 0; padding: 10px;">
+                      "%s"
+                  </blockquote>
+                  <p>Vui lòng trả lời sớm để tăng khả năng chốt đơn nhé!</p>
+                  <a href="%s" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Xem và Trả lời ngay</a>
+                  <p style="margin-top: 20px; font-size: 12px; color: #888;">Nếu nút không hoạt động, hãy copy link sau: %s</p>
+              </div>
+          </body>
+          </html>
+          """
+          .formatted(productName, question, productLink, productLink);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+      log.info("Question Notification Email sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send Question Notification email to {}", to, e);
+    }
+  }
+
+  @Async
+  public void sendAnswerNotification(String to, String productName, String question, String answer,
+      String productLink) {
+    try {
+      jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+      org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(
+          message, true, "UTF-8");
+
+      helper.setTo(to);
+      helper.setSubject("Người bán đã trả lời câu hỏi của bạn về: " + productName);
+
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h2 style="color: #333;">Câu hỏi của bạn đã được trả lời!</h2>
+                  <p>Xin chào,</p>
+                  <p>Người bán đã phản hồi câu hỏi của bạn về sản phẩm <b>%s</b>:</p>
+
+                  <div style="margin-bottom: 15px;">
+                      <b>Câu hỏi của bạn:</b>
+                      <div style="color: #555; font-style: italic;">"%s"</div>
+                  </div>
+
+                  <div style="margin-bottom: 15px;">
+                      <b>Trả lời:</b>
+                      <blockquote style="background: #e8f5e9; border-left: 4px solid #4caf50; margin: 5px 0; padding: 10px;">
+                          "%s"
+                      </blockquote>
+                  </div>
+
+                  <a href="%s" style="display: inline-block; padding: 10px 20px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 5px;">Xem chi tiết sản phẩm</a>
+              </div>
+          </body>
+          </html>
+          """
+          .formatted(productName, question, answer, productLink);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+      log.info("Answer Notification Email sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send Answer Notification email to {}", to, e);
+    }
+  }
 }
