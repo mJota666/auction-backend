@@ -84,6 +84,10 @@ public class BidServiceImpl implements BidService {
             if (ratingRatio < 0.8) {
                 throw new RuntimeException("Điểm tín nhiệm của bạn quá thấp (< 80%) để tham gia đấu giá.");
             }
+        } else {
+            if (!product.isAllowUnratedBidder()) {
+                throw new RuntimeException("Người bán không cho phép tài khoản chưa có đánh giá tham gia.");
+            }
         }
 
         BigDecimal minValidPrice = product.getCurrentPrice().add(product.getStepPrice());
