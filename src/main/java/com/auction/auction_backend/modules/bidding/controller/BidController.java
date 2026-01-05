@@ -30,4 +30,11 @@ public class BidController {
         bidService.blockBidder(productId, userId);
         return ResponseEntity.ok(BaseResponse.success("Đã chặn người dùng tham gia đấu giá sản phẩm này"));
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/me")
+    public ResponseEntity<BaseResponse<org.springframework.data.domain.Page<com.auction.auction_backend.modules.bidding.dto.response.MyBidResponse>>> getMyBids(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.auction.auction_backend.security.userdetail.UserPrincipal currentUser,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(BaseResponse.success(bidService.getMyBids(currentUser.getId(), pageable)));
+    }
 }

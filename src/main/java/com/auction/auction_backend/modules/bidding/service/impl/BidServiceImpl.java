@@ -29,6 +29,7 @@ public class BidServiceImpl implements BidService {
     private final AutoBidRepository autoBidRepository;
     private final AutoBidService autoBidService;
     private final com.auction.auction_backend.modules.bidding.repository.BlockedBidderRepository blockedBidderRepository;
+    private final com.auction.auction_backend.modules.bidding.repository.BidRepository bidRepository;
 
     @Override
     @Transactional
@@ -137,5 +138,19 @@ public class BidServiceImpl implements BidService {
         if (inputMaxAmount.compareTo(minValidPrice) < 0) {
             throw new AppException(ErrorCode.BID_AMOUNT_INVALID);
         }
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<com.auction.auction_backend.modules.bidding.dto.response.MyBidResponse> getMyBids(
+            Long userId, org.springframework.data.domain.Pageable pageable) {
+        return bidRepository.findByBidderId(userId, pageable)
+                .map(bid -> com.auction.auction_backend.modules.bidding.dto.response.MyBidResponse.builder()
+                        .id(bid.getId())
+                        .amount(bid.getBidAmount())
+                        .time(bid.getCreatedAt())
+                        .isAutoBid("AUTO".equals(bid.getBidType()))
+                        .product(com.auction.auction_backend.modules.product.dto.response.ProductResponse
+                                .fromEntity(bid.getProduct()))
+                        .build());
     }
 }
