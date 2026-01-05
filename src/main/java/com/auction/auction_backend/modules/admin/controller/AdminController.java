@@ -24,6 +24,12 @@ public class AdminController {
         return ResponseEntity.ok(BaseResponse.success(dashboardService.getDashboardStats()));
     }
 
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BaseResponse<DashboardResponse>> getStats() {
+        return ResponseEntity.ok(BaseResponse.success(dashboardService.getDashboardStats()));
+    }
+
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<com.auction.auction_backend.common.api.PageResponse<com.auction.auction_backend.modules.user.dto.response.UserResponse>>> getUsers(
