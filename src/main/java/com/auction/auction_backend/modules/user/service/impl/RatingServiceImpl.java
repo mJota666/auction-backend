@@ -6,6 +6,7 @@ import com.auction.auction_backend.common.exception.ErrorCode;
 import com.auction.auction_backend.modules.order.entity.Order;
 import com.auction.auction_backend.modules.order.repository.OrderRepository;
 import com.auction.auction_backend.modules.user.dto.request.CreateRatingRequest;
+import com.auction.auction_backend.modules.user.dto.response.RatingResponse;
 import com.auction.auction_backend.modules.user.entity.Rating;
 import com.auction.auction_backend.modules.user.entity.User;
 import com.auction.auction_backend.modules.user.repository.RatingRepository;
@@ -13,6 +14,8 @@ import com.auction.auction_backend.modules.user.repository.UserRepository;
 import com.auction.auction_backend.modules.user.service.RatingService;
 import com.auction.auction_backend.security.userdetail.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,5 +69,18 @@ public class RatingServiceImpl implements RatingService {
             ratedUser.setRatingNegative(ratedUser.getRatingNegative() + 1);
         }
         userRepository.save(ratedUser);
+    }
+
+    @Override
+    public Page<RatingResponse> getRatingsReceived(
+            Long userId, org.springframework.data.domain.Pageable pageable) {
+        return ratingRepository.findByRatedUserId(userId, pageable)
+                .map(rating -> com.auction.auction_backend.modules.user.dto.response.RatingResponse.builder()
+                        .id(rating.getId())
+                        .raterName(rating.getRater().getFullName())
+                        .score(rating.getScore())
+                        .comment(rating.getComment())
+                        .createdAt(rating.getCreatedAt())
+                        .build());
     }
 }

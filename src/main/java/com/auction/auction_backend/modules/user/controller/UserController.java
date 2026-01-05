@@ -5,6 +5,7 @@ import com.auction.auction_backend.modules.product.dto.response.ProductResponse;
 import com.auction.auction_backend.modules.user.dto.request.ChangePasswordRequest;
 import com.auction.auction_backend.modules.user.dto.request.UpdateProfileRequest;
 import com.auction.auction_backend.modules.user.entity.User;
+import com.auction.auction_backend.modules.user.service.RatingService;
 import com.auction.auction_backend.modules.user.service.UserService;
 import com.auction.auction_backend.security.userdetail.UserPrincipal;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final RatingService ratingService;
 
     @GetMapping("/me")
     public ResponseEntity<BaseResponse<User>> getMyProfile(@AuthenticationPrincipal UserPrincipal currentUser) {
@@ -64,5 +66,12 @@ public class UserController {
             @RequestBody @Valid com.auction.auction_backend.modules.user.dto.request.FavoriteRequest request) {
         userService.toggleFavorite(currentUser.getId(), request.getProductId());
         return ResponseEntity.ok(BaseResponse.success("Cập nhật danh sách yêu thích thành công"));
+    }
+
+    @GetMapping("/me/ratings")
+    public ResponseEntity<BaseResponse<Page<com.auction.auction_backend.modules.user.dto.response.RatingResponse>>> getMyRatings(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            Pageable pageable) {
+        return ResponseEntity.ok(BaseResponse.success(ratingService.getRatingsReceived(currentUser.getId(), pageable)));
     }
 }
