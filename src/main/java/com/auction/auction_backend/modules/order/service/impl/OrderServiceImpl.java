@@ -25,6 +25,7 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
         private final OrderRepository orderRepository;
+        private final com.auction.auction_backend.modules.user.service.RatingService ratingService;
         private final ProductRepository productRepository;
         private final UserRepository userRepository;
 
@@ -123,5 +124,32 @@ public class OrderServiceImpl implements OrderService {
                                 .build();
 
                 orderRepository.save(order);
+        }
+
+        @Override
+        @Transactional
+        public void cancelOrder(Long orderId) {
+                UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                                .getPrincipal();
+                Order order = orderRepository.findById(orderId)
+                                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+                if (!order.getSeller().getId().equals(currentUser.getId())) {
+                        throw new RuntimeException("Bạn không phải là người bán của đơn hàng này");
+                }
+
+                if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
+                        throw new RuntimeException("Chỉ có thể hủy đơn hàng khi chưa thanh toán");
+                }
+
+                order.setStatus(OrderStatus.CANCELLED);
+                orderRepository.save(order);
+
+                // Auto rate -1
+                com.auction.auction_backend.modules.user.dto.request.CreateRatingRequest ratingRequest = new com.auction.auction_backend.modules.user.dto.request.CreateRatingRequest();
+                ratingRequest.setOrderId(order.getId());
+                ratingRequest.setScore(-1);
+                ratingRequest.setComment("Người thắng không thanh toán (Hủy tự động bởi người bán)");
+                ratingService.createRating(ratingRequest);
         }
 }

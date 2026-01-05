@@ -6,9 +6,7 @@ import com.auction.auction_backend.common.exception.ErrorCode;
 
 import com.auction.auction_backend.modules.bidding.dto.request.PlaceBidRequest;
 import com.auction.auction_backend.modules.bidding.entity.AutoBidMax;
-import com.auction.auction_backend.modules.bidding.entity.Bid;
 import com.auction.auction_backend.modules.bidding.repository.AutoBidRepository;
-import com.auction.auction_backend.modules.bidding.repository.BidRepository;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
 import com.auction.auction_backend.modules.user.entity.User;
@@ -30,6 +28,7 @@ public class BidServiceImpl implements BidService {
     private final UserRepository userRepository;
     private final AutoBidRepository autoBidRepository;
     private final AutoBidService autoBidService;
+    private final com.auction.auction_backend.modules.bidding.repository.BlockedBidderRepository blockedBidderRepository;
 
     @Override
     @Transactional
@@ -56,6 +55,46 @@ public class BidServiceImpl implements BidService {
             autoBidRepository.save(autoBid);
         }
 
+        // Auto Extension Logic
+        if (product.isAutoExtendEnabled() &&
+                product.getEndAt().isBefore(java.time.LocalDateTime.now().plusMinutes(5))) {
+            product.setEndAt(product.getEndAt().plusMinutes(10));
+            productRepository.save(product);
+        }
+
+        autoBidService.triggerAutoBid(product);
+    }
+
+    @Override
+    @Transactional
+    public void blockBidder(Long productId, Long userId) {
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (!product.getSeller().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Bạn không phải là người bán của sản phẩm này");
+        }
+
+        User bidder = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (blockedBidderRepository.existsByProductIdAndUserId(productId, userId)) {
+            throw new RuntimeException("Người dùng đã bị chặn");
+        }
+
+        com.auction.auction_backend.modules.bidding.entity.BlockedBidder blocked = com.auction.auction_backend.modules.bidding.entity.BlockedBidder
+                .builder()
+                .product(product)
+                .user(bidder)
+                .build();
+        blockedBidderRepository.save(blocked);
+
+        // Remove existing autobids
+        autoBidRepository.deleteByProductAndBidder(product, bidder);
+
+        // Retrigger calculation
         autoBidService.triggerAutoBid(product);
     }
 
@@ -74,6 +113,10 @@ public class BidServiceImpl implements BidService {
 
         if (product.getSeller().getId().equals(bidder.getId())) {
             throw new AppException(ErrorCode.SELF_BIDDING);
+        }
+
+        if (blockedBidderRepository.existsByProductIdAndUserId(product.getId(), bidder.getId())) {
+            throw new RuntimeException("Bạn đã bị người bán chặn tham gia đấu giá sản phẩm này");
         }
 
         // Check Rating Point (Block if < 80%)

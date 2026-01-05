@@ -35,137 +35,140 @@ import java.util.Locale;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+        private final ProductRepository productRepository;
+        private final CategoryRepository categoryRepository;
+        private final UserRepository userRepository;
 
-    @Override
-    public void createProduct(CreateProductRequest request) {
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        User seller = userRepository.findById(currentUser.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        @Override
+        public void createProduct(CreateProductRequest request) {
+                UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                                .getPrincipal();
+                User seller = userRepository.findById(currentUser.getId())
+                                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+                Category category = categoryRepository.findById(request.getCategoryId())
+                                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        Product product = Product.builder()
-                .title(request.getTitle())
-                .titleNormalized(AppUtils.removeAccent(request.getTitle()))
-                .description(request.getDescription())
-                .startPrice(request.getStartPrice())
-                .currentPrice(request.getStartPrice())
-                .stepPrice(request.getStepPrice())
-                .buyNowPrice(request.getBuyNowPrice())
-                .startAt(LocalDateTime.now())
-                .endAt(request.getEndAt())
-                .status(ProductStatus.ACTIVE)
-                .seller(seller)
-                .category(category)
-                .build();
+                Product product = Product.builder()
+                                .title(request.getTitle())
+                                .titleNormalized(AppUtils.removeAccent(request.getTitle()))
+                                .description(request.getDescription())
+                                .startPrice(request.getStartPrice())
+                                .currentPrice(request.getStartPrice())
+                                .stepPrice(request.getStepPrice())
+                                .buyNowPrice(request.getBuyNowPrice())
+                                .startAt(LocalDateTime.now())
+                                .endAt(request.getEndAt())
+                                .status(ProductStatus.ACTIVE)
+                                .seller(seller)
+                                .category(category)
+                                .autoExtendEnabled(Boolean.TRUE.equals(request.getAutoExtendEnabled()))
+                                .build();
 
-        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
-            List<ProductImage> images = new ArrayList<>();
-            for (int i = 0; i < request.getImageUrls().size(); i++) {
-                images.add(ProductImage.builder()
-                        .product(product)
-                        .url(request.getImageUrls().get(i))
-                        .cover(i == 0)
-                        .build());
-            }
-            product.setImages(images);
-        }
-        productRepository.save(product);
-    }
-
-    @Override
-    public Page<ProductResponse> searchProducts(ProductSearchCriteria criteria) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt"); // Mặc định là mới nhất
-        if (criteria.getSortBy() != null) {
-            switch (criteria.getSortBy()) {
-                case "price_asc" -> sort = Sort.by(Sort.Direction.ASC, "currentPrice");
-                case "price_desc" -> sort = Sort.by(Sort.Direction.DESC, "currentPrice");
-                case "end_at_asc" -> sort = Sort.by(Sort.Direction.ASC, "endAt"); // Sắp hết hạn lên đầu
-            }
-        }
-        Pageable pageable = PageRequest.of(criteria.getPage(), criteria.getSize(), sort);
-        Specification<Product> spec = ProductSpecification.getSpecification(criteria);
-        Page<Product> productPage = productRepository.findAll(spec, pageable);
-        return productPage.map(ProductResponse::fromEntity);
-    }
-
-    @Override
-    public List<ProductResponse> getTop5EndingSoon() {
-        return productRepository.findTop5ByStatusOrderByEndAtAsc(ProductStatus.ACTIVE)
-                .stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-    }
-
-    @Override
-    public List<ProductResponse> getTop5HighestPrice() {
-        return productRepository.findTop5ByStatusOrderByCurrentPriceDesc(ProductStatus.ACTIVE)
-                .stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-    }
-
-    @Override
-    public List<ProductResponse> getTop5MostBids() {
-        return productRepository.findTopMostBidded(PageRequest.of(0, 5))
-                .stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-    }
-
-    @Override
-    public ProductDetailResponse getProductDetail(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        List<Product> relatedEntities = productRepository.findTop5ByCategoryIdAndIdNotAndStatus(
-                product.getCategory().getId(),
-                product.getId(),
-                ProductStatus.ACTIVE);
-
-        List<ProductResponse> relatedDTOs = relatedEntities.stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
-
-        return ProductDetailResponse.fromEntity(product, relatedDTOs);
-    }
-
-    @Override
-    public List<BidHistoryResponse> getProductBidHistory(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        if (product.getBids() == null)
-            return List.of();
-
-        return product.getBids().stream()
-                .sorted((b1, b2) -> b2.getBidAmount().compareTo(b1.getBidAmount())) // Sắp xếp giá giảm dần
-                .map(BidHistoryResponse::fromEntity)
-                .toList();
-    }
-
-    @Override
-    @org.springframework.transaction.annotation.Transactional
-    public void appendDescription(Long productId, String content) {
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        if (!product.getSeller().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("Bạn không phải là người bán của sản phẩm này");
+                if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+                        List<ProductImage> images = new ArrayList<>();
+                        for (int i = 0; i < request.getImageUrls().size(); i++) {
+                                images.add(ProductImage.builder()
+                                                .product(product)
+                                                .url(request.getImageUrls().get(i))
+                                                .cover(i == 0)
+                                                .build());
+                        }
+                        product.setImages(images);
+                }
+                productRepository.save(product);
         }
 
-        String newDescription = product.getDescription() +
-                "\n\n<p><strong>[Cập nhật ngày "
-                + java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").format(java.time.LocalDateTime.now())
-                + "]:</strong> " + content + "</p>";
+        @Override
+        public Page<ProductResponse> searchProducts(ProductSearchCriteria criteria) {
+                Sort sort = Sort.by(Sort.Direction.DESC, "createdAt"); // Mặc định là mới nhất
+                if (criteria.getSortBy() != null) {
+                        switch (criteria.getSortBy()) {
+                                case "price_asc" -> sort = Sort.by(Sort.Direction.ASC, "currentPrice");
+                                case "price_desc" -> sort = Sort.by(Sort.Direction.DESC, "currentPrice");
+                                case "end_at_asc" -> sort = Sort.by(Sort.Direction.ASC, "endAt"); // Sắp hết hạn lên đầu
+                        }
+                }
+                Pageable pageable = PageRequest.of(criteria.getPage(), criteria.getSize(), sort);
+                Specification<Product> spec = ProductSpecification.getSpecification(criteria);
+                Page<Product> productPage = productRepository.findAll(spec, pageable);
+                return productPage.map(ProductResponse::fromEntity);
+        }
 
-        product.setDescription(newDescription);
-        productRepository.save(product);
-    }
+        @Override
+        public List<ProductResponse> getTop5EndingSoon() {
+                return productRepository.findTop5ByStatusOrderByEndAtAsc(ProductStatus.ACTIVE)
+                                .stream()
+                                .map(ProductResponse::fromEntity)
+                                .toList();
+        }
+
+        @Override
+        public List<ProductResponse> getTop5HighestPrice() {
+                return productRepository.findTop5ByStatusOrderByCurrentPriceDesc(ProductStatus.ACTIVE)
+                                .stream()
+                                .map(ProductResponse::fromEntity)
+                                .toList();
+        }
+
+        @Override
+        public List<ProductResponse> getTop5MostBids() {
+                return productRepository.findTopMostBidded(PageRequest.of(0, 5))
+                                .stream()
+                                .map(ProductResponse::fromEntity)
+                                .toList();
+        }
+
+        @Override
+        public ProductDetailResponse getProductDetail(Long id) {
+                Product product = productRepository.findById(id)
+                                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+                List<Product> relatedEntities = productRepository.findTop5ByCategoryIdAndIdNotAndStatus(
+                                product.getCategory().getId(),
+                                product.getId(),
+                                ProductStatus.ACTIVE);
+
+                List<ProductResponse> relatedDTOs = relatedEntities.stream()
+                                .map(ProductResponse::fromEntity)
+                                .toList();
+
+                return ProductDetailResponse.fromEntity(product, relatedDTOs);
+        }
+
+        @Override
+        public List<BidHistoryResponse> getProductBidHistory(Long id) {
+                Product product = productRepository.findById(id)
+                                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+                if (product.getBids() == null)
+                        return List.of();
+
+                return product.getBids().stream()
+                                .sorted((b1, b2) -> b2.getBidAmount().compareTo(b1.getBidAmount())) // Sắp xếp giá giảm
+                                                                                                    // dần
+                                .map(BidHistoryResponse::fromEntity)
+                                .toList();
+        }
+
+        @Override
+        @org.springframework.transaction.annotation.Transactional
+        public void appendDescription(Long productId, String content) {
+                UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                                .getPrincipal();
+                Product product = productRepository.findById(productId)
+                                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+                if (!product.getSeller().getId().equals(currentUser.getId())) {
+                        throw new RuntimeException("Bạn không phải là người bán của sản phẩm này");
+                }
+
+                String newDescription = product.getDescription() +
+                                "\n\n<p><strong>[Cập nhật ngày "
+                                + java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                                                .format(java.time.LocalDateTime.now())
+                                + "]:</strong> " + content + "</p>";
+
+                product.setDescription(newDescription);
+                productRepository.save(product);
+        }
 }

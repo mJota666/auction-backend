@@ -14,5 +14,8 @@ public interface AutoBidRepository extends JpaRepository<AutoBidMax, Long> {
             "WHERE a.product.id = :productId " +
             "ORDER BY a.maxAmount DESC, a.createdAt ASC")
     List<AutoBidMax> findSortedBids(Long productId);
+
     Optional<AutoBidMax> findByProductAndBidder(Product product, User bidder);
+
+    void deleteByProductAndBidder(Product product, User bidder);
 }

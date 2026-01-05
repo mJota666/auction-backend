@@ -19,4 +19,6 @@ public interface OrderService {
     OrderResponse getOrderDetail(Long orderId);
 
     void createOrderFromAuction(com.auction.auction_backend.modules.product.entity.Product product);
+
+    void cancelOrder(Long orderId);
 }

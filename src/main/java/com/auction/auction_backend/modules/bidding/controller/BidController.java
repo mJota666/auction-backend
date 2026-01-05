@@ -22,4 +22,12 @@ public class BidController {
         bidService.placeBid(placeBidRequest);
         return ResponseEntity.ok(BaseResponse.success("Đặt giá thành công"));
     }
+
+    @PostMapping("/{productId}/block/{userId}")
+    public ResponseEntity<BaseResponse<String>> blockBidder(
+            @org.springframework.web.bind.annotation.PathVariable Long productId,
+            @org.springframework.web.bind.annotation.PathVariable Long userId) {
+        bidService.blockBidder(productId, userId);
+        return ResponseEntity.ok(BaseResponse.success("Đã chặn người dùng tham gia đấu giá sản phẩm này"));
+    }
 }

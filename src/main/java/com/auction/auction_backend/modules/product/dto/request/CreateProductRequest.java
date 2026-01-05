@@ -32,4 +32,6 @@ public class CreateProductRequest {
     private LocalDateTime endAt;
 
     private List<String> imageUrls;
+
+    private Boolean autoExtendEnabled;
 }
