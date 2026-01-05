@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,8 @@ public class UserPrincipal implements UserDetails {
     private String fullname;
     private int ratingPositive;
     private int ratingNegative;
+    private String address;
+    private LocalDate dob;
     private Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(User user) {
@@ -34,6 +37,8 @@ public class UserPrincipal implements UserDetails {
                 user.getFullName(),
                 user.getRatingPositive(),
                 user.getRatingNegative(),
+                user.getAddress(),
+                user.getDob(),
                 authorities);
     }
 

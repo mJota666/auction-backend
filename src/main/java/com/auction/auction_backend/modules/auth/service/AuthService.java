@@ -79,6 +79,8 @@ public class AuthService {
                 .fullname(userDetails.getFullname())
                 .ratingPositive(userDetails.getRatingPositive())
                 .ratingNegative(userDetails.getRatingNegative())
+                .address(userDetails.getAddress())
+                .dob(userDetails.getDob())
                 .role(userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""))
                 .build();
     }
