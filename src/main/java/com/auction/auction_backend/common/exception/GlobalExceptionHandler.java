@@ -25,7 +25,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e,
+            HttpServletRequest request) {
         String message = e.getBindingResult().getFieldError().getDefaultMessage();
         ErrorResponse response = ErrorResponse.builder()
                 .status(400)
@@ -34,6 +35,18 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(
+            org.springframework.security.authentication.BadCredentialsException e, HttpServletRequest request) {
+        ErrorResponse response = ErrorResponse.builder()
+                .status(401)
+                .code(401)
+                .message("Email hoặc mật khẩu không chính xác")
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(401).body(response);
     }
 
     @ExceptionHandler(Exception.class)
@@ -49,7 +62,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-    public ResponseEntity<ErrorResponse> handleConcurrencyError(ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleConcurrencyError(ObjectOptimisticLockingFailureException e,
+            HttpServletRequest request) {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(409)
