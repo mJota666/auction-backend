@@ -102,6 +102,8 @@ public class AuthService {
                 .fullName(request.getFullname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .address(request.getAddress())
+                .dob(request.getDob())
                 .role(UserRole.BIDDER)
                 .active(false) // Deactive until verify
                 .verificationCode(otp)
