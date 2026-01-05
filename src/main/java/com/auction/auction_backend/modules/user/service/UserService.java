@@ -16,6 +16,8 @@ public interface UserService {
 
     void toggleFavorite(Long userId, Long productId);
 
+    void removeFavorite(Long userId, Long productId);
+
     Page<ProductResponse> getFavoriteProducts(Long userId, Pageable pageable);
 
     com.auction.auction_backend.common.api.PageResponse<com.auction.auction_backend.modules.user.dto.response.UserResponse> getUsers(

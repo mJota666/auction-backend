@@ -60,6 +60,14 @@ public class UserController {
         return ResponseEntity.ok(BaseResponse.success("Cập nhật danh sách yêu thích thành công"));
     }
 
+    @DeleteMapping("/favorites/{productId}")
+    public ResponseEntity<BaseResponse<String>> removeFavorite(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PathVariable Long productId) {
+        userService.removeFavorite(currentUser.getId(), productId);
+        return ResponseEntity.ok(BaseResponse.success("Đã xóa khỏi danh sách yêu thích"));
+    }
+
     @PostMapping("/favorites")
     public ResponseEntity<BaseResponse<String>> toggleFavoriteBody(
             @AuthenticationPrincipal UserPrincipal currentUser,

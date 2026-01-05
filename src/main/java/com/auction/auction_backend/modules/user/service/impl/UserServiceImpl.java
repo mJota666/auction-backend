@@ -88,6 +88,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public void removeFavorite(Long userId, Long productId) {
+        User user = getUserById(userId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Set<Product> favorites = user.getFavoriteProducts();
+        if (favorites.contains(product)) {
+            favorites.remove(product);
+            userRepository.save(user);
+        }
+    }
+
+    @Override
     public Page<ProductResponse> getFavoriteProducts(Long userId, Pageable pageable) {
         User user = getUserById(userId);
         // Note: For large datasets, this in-memory pagination is not efficient.
