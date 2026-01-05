@@ -27,4 +27,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findTop5ByCategoryIdAndIdNotAndStatus(Long categoryId, Long productId, ProductStatus status);
 
     long countByStatus(ProductStatus status);
+
+    long countByCategoryId(Long categoryId);
 }

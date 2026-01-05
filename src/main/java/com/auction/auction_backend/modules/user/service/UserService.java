@@ -22,4 +22,6 @@ public interface UserService {
             String keyword, int page, int size);
 
     void banUser(Long userId, boolean ban);
+
+    void requestUpgrade(Long userId, com.auction.auction_backend.modules.user.dto.request.CreateUpgradeRequest request);
 }

@@ -171,4 +171,15 @@ public class ProductServiceImpl implements ProductService {
                 product.setDescription(newDescription);
                 productRepository.save(product);
         }
+
+        @Override
+        @org.springframework.transaction.annotation.Transactional
+        public void deleteProduct(Long id) {
+                Product product = productRepository.findById(id)
+                                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+                // Soft delete
+                product.setStatus(ProductStatus.REMOVED);
+                productRepository.save(product);
+        }
 }

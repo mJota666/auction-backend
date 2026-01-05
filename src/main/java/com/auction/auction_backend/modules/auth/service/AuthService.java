@@ -26,6 +26,42 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final com.auction.auction_backend.modules.notification.service.EmailService emailService;
 
+    @Transactional
+    public void forgotPassword(com.auction.auction_backend.modules.auth.dto.request.ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+
+        // Generate 6 digit OTP
+        String otp = String.valueOf((int) ((Math.random() * 900000) + 100000));
+        System.out.println("======================================");
+        System.out.println("Reset Password OTP for " + request.getEmail() + ": " + otp);
+        System.out.println("======================================");
+
+        // Send OTP via Email
+        emailService.sendOtpEmail(request.getEmail(), otp);
+
+        user.setVerificationCode(otp);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void resetPassword(com.auction.auction_backend.modules.auth.dto.request.ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+
+        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(request.getOtp())) {
+            throw new RuntimeException("Mã OTP không hợp lệ");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu xác nhận không khớp");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setVerificationCode(null);
+        userRepository.save(user);
+    }
+
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));

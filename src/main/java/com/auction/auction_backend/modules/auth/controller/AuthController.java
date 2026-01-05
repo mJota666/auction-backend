@@ -44,4 +44,18 @@ public class AuthController {
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<BaseResponse<String>> forgotPassword(
+            @RequestBody @Valid com.auction.auction_backend.modules.auth.dto.request.ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(BaseResponse.success("Mã OTP đã được gửi đến email của bạn"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<BaseResponse<String>> resetPassword(
+            @RequestBody @Valid com.auction.auction_backend.modules.auth.dto.request.ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(BaseResponse.success("Đặt lại mật khẩu thành công"));
+    }
 }

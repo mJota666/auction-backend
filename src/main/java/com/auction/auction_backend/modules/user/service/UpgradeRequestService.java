@@ -1,15 +1,13 @@
 package com.auction.auction_backend.modules.user.service;
 
-import com.auction.auction_backend.common.api.PageResponse;
-import com.auction.auction_backend.common.enums.UpgradeRequestStatus;
-import com.auction.auction_backend.modules.user.dto.request.ProcessUpgradeRequest;
-import com.auction.auction_backend.modules.user.dto.request.RequestUpgradeRequest;
-import com.auction.auction_backend.modules.user.dto.response.UpgradeRequestResponse;
+import com.auction.auction_backend.modules.user.entity.UpgradeRequest;
+
+import java.util.List;
 
 public interface UpgradeRequestService {
-    void requestUpgrade(RequestUpgradeRequest request);
+    List<UpgradeRequest> getPendingRequests();
 
-    PageResponse<UpgradeRequestResponse> getRequestsByStatus(UpgradeRequestStatus status, int page, int size);
+    void approveRequest(Long requestId);
 
-    void processRequest(Long requestId, ProcessUpgradeRequest request);
+    void rejectRequest(Long requestId, String adminNote);
 }

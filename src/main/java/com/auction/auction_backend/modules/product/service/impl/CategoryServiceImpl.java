@@ -13,10 +13,24 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final com.auction.auction_backend.modules.product.repository.ProductRepository productRepository;
 
     @Override
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
+    }
+
+    @Override
+    public void deleteCategory(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new RuntimeException("Danh mục không tồn tại");
+        }
+
+        if (productRepository.countByCategoryId(id) > 0) {
+            throw new RuntimeException("Không thể xóa danh mục đã có sản phẩm");
+        }
+
+        categoryRepository.deleteById(id);
     }
 
     @Override
@@ -34,14 +48,6 @@ public class CategoryServiceImpl implements CategoryService {
         category.setParentId(categoryRequest.getParentId());
 
         return categoryRepository.save(category);
-    }
-
-    @Override
-    public void deleteCategory(Long id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new RuntimeException("Danh mục không tồn tại");
-        }
-        categoryRepository.deleteById(id);
     }
 
     @Override

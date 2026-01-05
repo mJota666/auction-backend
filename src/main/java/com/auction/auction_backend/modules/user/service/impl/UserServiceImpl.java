@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.auction.auction_backend.modules.user.repository.UpgradeRequestRepository upgradeRequestRepository;
 
     @Override
     public User getProfile(Long userId) {
@@ -42,6 +43,14 @@ public class UserServiceImpl implements UserService {
         user.setFullName(request.getFullName());
         user.setAddress(request.getAddress());
         user.setDob(request.getDob());
+
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("Email đã được sử dụng bởi tài khoản khác");
+            }
+            user.setEmail(request.getEmail());
+        }
+
         userRepository.save(user);
     }
 
@@ -146,6 +155,32 @@ public class UserServiceImpl implements UserService {
         }
         user.setActive(!ban);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void requestUpgrade(Long userId,
+            com.auction.auction_backend.modules.user.dto.request.CreateUpgradeRequest request) {
+        User user = getUserById(userId);
+
+        if (user.getRole() == com.auction.auction_backend.common.enums.UserRole.SELLER ||
+                user.getRole() == com.auction.auction_backend.common.enums.UserRole.ADMIN) {
+            throw new RuntimeException("Tài khoản đã là người bán hoặc admin");
+        }
+
+        if (upgradeRequestRepository.existsByUserIdAndStatus(userId,
+                com.auction.auction_backend.common.enums.UpgradeRequestStatus.PENDING)) {
+            throw new RuntimeException("Bạn đang có yêu cầu nâng cấp chờ duyệt");
+        }
+
+        com.auction.auction_backend.modules.user.entity.UpgradeRequest upgradeRequest = com.auction.auction_backend.modules.user.entity.UpgradeRequest
+                .builder()
+                .user(user)
+                .reason(request.getReason())
+                .status(com.auction.auction_backend.common.enums.UpgradeRequestStatus.PENDING)
+                .build();
+
+        upgradeRequestRepository.save(upgradeRequest);
     }
 
     private User getUserById(Long userId) {

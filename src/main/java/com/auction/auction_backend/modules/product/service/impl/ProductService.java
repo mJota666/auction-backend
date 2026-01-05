@@ -25,4 +25,6 @@ public interface ProductService {
     public List<BidHistoryResponse> getProductBidHistory(Long id);
 
     void appendDescription(Long productId, String content);
+
+    void deleteProduct(Long id);
 }

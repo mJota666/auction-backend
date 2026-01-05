@@ -11,6 +11,9 @@ public class UpdateProfileRequest {
     @NotBlank(message = "Họ tên không được để trống")
     private String fullName;
 
+    @jakarta.validation.constraints.Email(message = "Email không hợp lệ")
+    private String email;
+
     private String address;
 
     @Past(message = "Ngày sinh phải trong quá khứ")
