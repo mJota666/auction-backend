@@ -14,6 +14,7 @@ public enum ErrorCode {
     EMAIL_EXISTED(1003, "Email này đã được đăng ký", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1004, "Vui lòng đăng nhập", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1005, "Bạn không có quyền thực hiện thao tác này", HttpStatus.FORBIDDEN),
+    UPGRADE_REQUEST_ALREADY_EXISTS(1006, "Bạn đang có yêu cầu nâng cấp chờ duyệt", HttpStatus.BAD_REQUEST),
 
     // 3. Lỗi Product/Category
     PRODUCT_NOT_FOUND(2001, "Sản phẩm không tồn tại", HttpStatus.NOT_FOUND),

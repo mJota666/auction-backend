@@ -4,12 +4,13 @@ import com.auction.auction_backend.common.enums.ProductStatus;
 import com.auction.auction_backend.common.persistence.entity.BaseEntity;
 import com.auction.auction_backend.modules.bidding.entity.Bid;
 import com.auction.auction_backend.modules.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -74,6 +75,7 @@ public class Product extends BaseEntity {
     private ProductStatus status;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Bid> bids;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

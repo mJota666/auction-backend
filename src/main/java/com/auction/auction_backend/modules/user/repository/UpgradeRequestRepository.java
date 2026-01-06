@@ -17,4 +17,6 @@ public interface UpgradeRequestRepository extends JpaRepository<UpgradeRequest, 
     Page<UpgradeRequest> findByStatus(UpgradeRequestStatus status, Pageable pageable);
 
     boolean existsByUserIdAndStatus(Long userId, UpgradeRequestStatus status);
+
+    Optional<UpgradeRequest> findByUserIdAndStatus(Long userId, UpgradeRequestStatus status);
 }

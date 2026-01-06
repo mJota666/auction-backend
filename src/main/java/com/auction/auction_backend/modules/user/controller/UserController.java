@@ -68,6 +68,20 @@ public class UserController {
         return ResponseEntity.ok(BaseResponse.success("Đã xóa khỏi danh sách yêu thích"));
     }
 
+    @PostMapping("/upgrade-request")
+    public ResponseEntity<BaseResponse<String>> requestUpgrade(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestBody @Valid com.auction.auction_backend.modules.user.dto.request.CreateUpgradeRequest request) {
+        userService.requestUpgrade(currentUser.getId(), request);
+        return ResponseEntity.ok(BaseResponse.success("Gửi yêu cầu nâng cấp thành công"));
+    }
+
+    @GetMapping("/upgrade-request")
+    public ResponseEntity<BaseResponse<com.auction.auction_backend.modules.user.entity.UpgradeRequest>> getMyUpgradeRequest(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        return ResponseEntity.ok(BaseResponse.success(userService.getMyUpgradeRequest(currentUser.getId())));
+    }
+
     @PostMapping("/favorites")
     public ResponseEntity<BaseResponse<String>> toggleFavoriteBody(
             @AuthenticationPrincipal UserPrincipal currentUser,

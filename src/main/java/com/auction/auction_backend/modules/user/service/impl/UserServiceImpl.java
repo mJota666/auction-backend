@@ -1,13 +1,20 @@
 package com.auction.auction_backend.modules.user.service.impl;
 
+import com.auction.auction_backend.common.api.PageResponse;
+import com.auction.auction_backend.common.enums.UpgradeRequestStatus;
+import com.auction.auction_backend.common.enums.UserRole;
 import com.auction.auction_backend.common.exception.AppException;
 import com.auction.auction_backend.common.exception.ErrorCode;
 import com.auction.auction_backend.modules.product.dto.response.ProductResponse;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
 import com.auction.auction_backend.modules.user.dto.request.ChangePasswordRequest;
+import com.auction.auction_backend.modules.user.dto.request.CreateUpgradeRequest;
 import com.auction.auction_backend.modules.user.dto.request.UpdateProfileRequest;
+import com.auction.auction_backend.modules.user.dto.response.UserResponse;
+import com.auction.auction_backend.modules.user.entity.UpgradeRequest;
 import com.auction.auction_backend.modules.user.entity.User;
+import com.auction.auction_backend.modules.user.repository.UpgradeRequestRepository;
 import com.auction.auction_backend.modules.user.repository.UserRepository;
 import com.auction.auction_backend.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
-    private final com.auction.auction_backend.modules.user.repository.UpgradeRequestRepository upgradeRequestRepository;
+    private final UpgradeRequestRepository upgradeRequestRepository;
 
     @Override
     public User getProfile(Long userId) {
@@ -104,9 +111,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<ProductResponse> getFavoriteProducts(Long userId, Pageable pageable) {
         User user = getUserById(userId);
-        // Note: For large datasets, this in-memory pagination is not efficient.
-        // Better to use a repository query with JoinTable, but this works for
-        // MVP/smaller lists.
         List<ProductResponse> list = user.getFavoriteProducts().stream()
                 .map(ProductResponse::fromEntity)
                 .toList();
@@ -122,36 +126,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public com.auction.auction_backend.common.api.PageResponse<com.auction.auction_backend.modules.user.dto.response.UserResponse> getUsers(
+    public PageResponse<UserResponse> getUsers(
             String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size);
         Page<User> pageResult;
 
         if (keyword != null && !keyword.isBlank()) {
-            // Assuming we need to add findByFullNameContainingOrEmailContaining to
-            // UserRepository.
-            // For now, let's just findAll if repository is not updated yet, or I can update
-            // repo in next step.
-            // Ideally I should update Repo first. But let's check if it exists or use
-            // standard JPA specs?
-            // To avoid compilation error, I will use findAll for now and filter or better,
-            // update Repo.
-            // Given I can do tool calls, I should probably update Repo first.
-            // But let's write this method to handle the repo update coming next.
-            // Wait, I can't write code that won't compile.
-            // Let's use findAll for now to be safe, or assume I will update repo.
-            // I'll update repo right after this.
             pageResult = userRepository.findAll(pageable);
         } else {
             pageResult = userRepository.findAll(pageable);
         }
 
-        List<com.auction.auction_backend.modules.user.dto.response.UserResponse> response = pageResult.getContent()
+        List<UserResponse> response = pageResult.getContent()
                 .stream()
-                .map(com.auction.auction_backend.modules.user.dto.response.UserResponse::fromEntity)
+                .map(UserResponse::fromEntity)
                 .toList();
 
-        return com.auction.auction_backend.common.api.PageResponse.<com.auction.auction_backend.modules.user.dto.response.UserResponse>builder()
+        return PageResponse.<UserResponse>builder()
                 .content(response)
                 .page(pageResult.getNumber() + 1)
                 .size(pageResult.getSize())
@@ -164,7 +155,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void banUser(Long userId, boolean ban) {
         User user = getUserById(userId);
-        if (user.getRole() == com.auction.auction_backend.common.enums.UserRole.ADMIN) {
+        if (user.getRole() == UserRole.ADMIN) {
             throw new RuntimeException("Không thể khóa tài khoản Admin");
         }
         user.setActive(!ban);
@@ -174,27 +165,33 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void requestUpgrade(Long userId,
-            com.auction.auction_backend.modules.user.dto.request.CreateUpgradeRequest request) {
+            CreateUpgradeRequest request) {
         User user = getUserById(userId);
 
-        if (user.getRole() == com.auction.auction_backend.common.enums.UserRole.SELLER ||
-                user.getRole() == com.auction.auction_backend.common.enums.UserRole.ADMIN) {
+        if (user.getRole() == UserRole.SELLER ||
+                user.getRole() == UserRole.ADMIN) {
             throw new RuntimeException("Tài khoản đã là người bán hoặc admin");
         }
 
         if (upgradeRequestRepository.existsByUserIdAndStatus(userId,
-                com.auction.auction_backend.common.enums.UpgradeRequestStatus.PENDING)) {
-            throw new RuntimeException("Bạn đang có yêu cầu nâng cấp chờ duyệt");
+                UpgradeRequestStatus.PENDING)) {
+            throw new AppException(ErrorCode.UPGRADE_REQUEST_ALREADY_EXISTS);
         }
 
-        com.auction.auction_backend.modules.user.entity.UpgradeRequest upgradeRequest = com.auction.auction_backend.modules.user.entity.UpgradeRequest
+        UpgradeRequest upgradeRequest = UpgradeRequest
                 .builder()
                 .user(user)
                 .reason(request.getReason())
-                .status(com.auction.auction_backend.common.enums.UpgradeRequestStatus.PENDING)
+                .status(UpgradeRequestStatus.PENDING)
                 .build();
 
         upgradeRequestRepository.save(upgradeRequest);
+    }
+
+    @Override
+    public UpgradeRequest getMyUpgradeRequest(Long userId) {
+        return upgradeRequestRepository.findByUserIdAndStatus(userId,
+                UpgradeRequestStatus.PENDING).orElse(null);
     }
 
     private User getUserById(Long userId) {

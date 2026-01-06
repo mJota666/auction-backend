@@ -2,10 +2,15 @@ package com.auction.auction_backend.modules.user.entity;
 
 import com.auction.auction_backend.common.enums.UserRole;
 import com.auction.auction_backend.common.persistence.entity.BaseEntity;
+import com.auction.auction_backend.modules.product.entity.Product;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -22,6 +27,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -49,5 +55,6 @@ public class User extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_favorite_products", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
-    private java.util.Set<com.auction.auction_backend.modules.product.entity.Product> favoriteProducts = new java.util.HashSet<>();
+    @JsonIgnore
+    private Set<Product> favoriteProducts = new HashSet<>();
 }
