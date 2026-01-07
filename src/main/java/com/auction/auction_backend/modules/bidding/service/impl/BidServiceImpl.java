@@ -169,4 +169,28 @@ public class BidServiceImpl implements BidService {
                                 .fromEntity(bid.getProduct()))
                         .build());
     }
+
+    @Override
+    public org.springframework.data.domain.Page<com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse> getProductBids(
+            Long productId, org.springframework.data.domain.Pageable pageable) {
+
+        return bidRepository.findByProductId(productId, pageable)
+                .map(bid -> com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse.builder()
+                        .id(bid.getId())
+                        .amount(bid.getBidAmount())
+                        .time(bid.getCreatedAt())
+                        .bidderName(maskBidderName(bid.getBidder().getFullName()))
+                        .build());
+    }
+
+    private String maskBidderName(String fullName) {
+        if (fullName == null || fullName.isBlank()) {
+            return "****User";
+        }
+        String[] parts = fullName.trim().split("\\s+");
+        if (parts.length > 0) {
+            return "****" + parts[parts.length - 1];
+        }
+        return "****User";
+    }
 }

@@ -63,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
                                 .seller(seller)
                                 .category(category)
                                 .autoExtendEnabled(Boolean.TRUE.equals(request.getAutoExtendEnabled()))
+                                .allowUnratedBidder(Boolean.TRUE.equals(request.getAllowUnratedBidder()))
                                 .build();
 
                 if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {

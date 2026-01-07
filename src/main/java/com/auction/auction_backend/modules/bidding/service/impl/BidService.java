@@ -12,4 +12,7 @@ public interface BidService {
     public void blockBidder(Long productId, Long userId);
 
     Page<MyBidResponse> getMyBids(Long userId, Pageable pageable);
+
+    org.springframework.data.domain.Page<com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse> getProductBids(
+            Long productId, Pageable pageable);
 }

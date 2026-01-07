@@ -34,4 +34,6 @@ public class CreateProductRequest {
     private List<String> imageUrls;
 
     private Boolean autoExtendEnabled;
+
+    private Boolean allowUnratedBidder;
 }

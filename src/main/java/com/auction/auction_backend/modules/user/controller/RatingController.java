@@ -22,4 +22,11 @@ public class RatingController {
         ratingService.createRating(request);
         return ResponseEntity.ok(BaseResponse.success("Đánh giá thành công"));
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/my-ratings")
+    public ResponseEntity<BaseResponse<org.springframework.data.domain.Page<com.auction.auction_backend.modules.user.dto.response.RatingResponse>>> getMyRatings(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.auction.auction_backend.security.userdetail.UserPrincipal currentUser,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(BaseResponse.success(ratingService.getRatingsReceived(currentUser.getId(), pageable)));
+    }
 }

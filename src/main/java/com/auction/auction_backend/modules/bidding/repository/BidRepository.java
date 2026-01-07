@@ -8,4 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface BidRepository extends JpaRepository<Bid, Long> {
     Page<Bid> findByBidderId(Long bidderId, Pageable pageable);
+
+    Page<Bid> findByProductId(Long productId, Pageable pageable);
 }

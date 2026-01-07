@@ -37,4 +37,11 @@ public class BidController {
             org.springframework.data.domain.Pageable pageable) {
         return ResponseEntity.ok(BaseResponse.success(bidService.getMyBids(currentUser.getId(), pageable)));
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/product/{productId}")
+    public ResponseEntity<BaseResponse<org.springframework.data.domain.Page<com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse>>> getProductBids(
+            @org.springframework.web.bind.annotation.PathVariable Long productId,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(BaseResponse.success(bidService.getProductBids(productId, pageable)));
+    }
 }
