@@ -6,6 +6,7 @@ import com.auction.auction_backend.modules.admin.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -84,5 +85,12 @@ public class AdminController {
         // So if admin wants to see EVERYTHING needed to set includeAllStatuses=true.
         // Or we can set a default for admin here. Let's make it flexible.
         return ResponseEntity.ok(BaseResponse.success(productService.searchProducts(criteria)));
+    }
+
+    @DeleteMapping("/products/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BaseResponse<String>> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok(BaseResponse.success("Xóa sản phẩm thành công"));
     }
 }
