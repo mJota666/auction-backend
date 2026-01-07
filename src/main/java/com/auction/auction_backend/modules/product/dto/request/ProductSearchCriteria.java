@@ -10,4 +10,6 @@ public class ProductSearchCriteria {
     private String sortBy;
     private int page = 0;
     private int size = 10;
+    private com.auction.auction_backend.common.enums.ProductStatus status;
+    private Boolean includeAllStatuses;
 }

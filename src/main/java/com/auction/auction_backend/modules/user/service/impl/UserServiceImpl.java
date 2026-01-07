@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
 
         if (user.getRole() == UserRole.SELLER ||
                 user.getRole() == UserRole.ADMIN) {
-            throw new RuntimeException("Tài khoản đã là người bán hoặc admin");
+            throw new AppException(ErrorCode.USER_ALREADY_SELLER);
         }
 
         if (upgradeRequestRepository.existsByUserIdAndStatus(userId,

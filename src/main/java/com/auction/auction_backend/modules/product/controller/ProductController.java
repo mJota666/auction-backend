@@ -22,9 +22,11 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    @GetMapping("/search")
+    @GetMapping({ "", "/search" })
     public ResponseEntity<BaseResponse<Page<ProductResponse>>> searchProducts(
             @ModelAttribute ProductSearchCriteria criteria) {
+        criteria.setIncludeAllStatuses(false);
+        criteria.setStatus(com.auction.auction_backend.common.enums.ProductStatus.ACTIVE);
         return ResponseEntity.ok(BaseResponse.success(productService.searchProducts(criteria)));
     }
 

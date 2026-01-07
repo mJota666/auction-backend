@@ -14,7 +14,13 @@ public class ProductSpecification {
     public static Specification<Product> getSpecification(ProductSearchCriteria criteria) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(criteriaBuilder.equal(root.get("status"), ProductStatus.ACTIVE));
+            if (!Boolean.TRUE.equals(criteria.getIncludeAllStatuses())) {
+                if (criteria.getStatus() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("status"), criteria.getStatus()));
+                } else {
+                    predicates.add(criteriaBuilder.equal(root.get("status"), ProductStatus.ACTIVE));
+                }
+            }
 
             if (criteria.getKeyword() != null && !criteria.getKeyword().isEmpty()) {
                 String keywordLike = "%" + criteria.getKeyword().toLowerCase() + "%";

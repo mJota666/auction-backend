@@ -21,6 +21,7 @@ public class AdminController {
     private final DashboardService dashboardService;
     private final com.auction.auction_backend.modules.user.service.UserService userService;
     private final com.auction.auction_backend.modules.user.service.UpgradeRequestService upgradeRequestService;
+    private final com.auction.auction_backend.modules.product.service.impl.ProductService productService;
 
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('ADMIN')")
@@ -66,11 +67,22 @@ public class AdminController {
         return ResponseEntity.ok(BaseResponse.success("Duyệt yêu cầu thành công"));
     }
 
-    @PostMapping("/upgrade-requests/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<String>> rejectUpgradeRequest(@PathVariable Long id,
             @RequestParam String reason) {
         upgradeRequestService.rejectRequest(id, reason);
         return ResponseEntity.ok(BaseResponse.success("Từ chối yêu cầu thành công"));
+    }
+
+    @GetMapping("/products")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BaseResponse<org.springframework.data.domain.Page<com.auction.auction_backend.modules.product.dto.response.ProductResponse>>> getProducts(
+            @org.springframework.web.bind.annotation.ModelAttribute com.auction.auction_backend.modules.product.dto.request.ProductSearchCriteria criteria) {
+        // Admin see all by default if not specified, but let's allow FE to decide
+        // If FE sends nothing, includeAllStatuses is null -> ProductSpecification
+        // defaults to ACTIVE unless we change logic.
+        // Wait, ProductSpec: if !TRUE.equals(includeAllStatuses) -> check status.
+        // So if admin wants to see EVERYTHING needed to set includeAllStatuses=true.
+        // Or we can set a default for admin here. Let's make it flexible.
+        return ResponseEntity.ok(BaseResponse.success(productService.searchProducts(criteria)));
     }
 }
