@@ -238,4 +238,155 @@ public class EmailService {
       log.error("Failed to send Answer Notification email to {}", to, e);
     }
   }
+
+  @Async
+  public void sendBidPlacedNotification(String to, String productName, java.math.BigDecimal bidAmount,
+      String productLink, boolean isSeller) {
+    try {
+      jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+      org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(
+          message, true, "UTF-8");
+
+      helper.setTo(to);
+      String subject = isSeller ? "Sản phẩm của bạn có lượt ra giá mới: " + productName
+          : "Ra giá thành công: " + productName;
+      helper.setSubject(subject);
+
+      String content = isSeller
+          ? "<p>Sản phẩm <b>%s</b> vừa nhận được mức giá mới: <b>%s VNĐ</b>.</p>".formatted(productName,
+              bidAmount)
+          : "<p>Bạn đã ra giá <b>%s VNĐ</b> thành công cho sản phẩm <b>%s</b>.</p>".formatted(bidAmount,
+              productName);
+
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px;">
+                  <h2 style="color: #2c3e50;">%s</h2>
+                  %s
+                  <p>Xem chi tiết tại: <a href="%s">%s</a></p>
+              </div>
+          </body>
+          </html>
+          """
+          .formatted(subject, content, productLink, productName);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+      log.info("Bid Notification Email sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send Bid Notification email to {}", to, e);
+    }
+  }
+
+  @Async
+  public void sendOutbidNotification(String to, String productName, java.math.BigDecimal newPrice, String productLink) {
+    try {
+      jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+      org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(
+          message, true, "UTF-8");
+
+      helper.setTo(to);
+      helper.setSubject("Bạn đã bị vượt giá: " + productName);
+
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px;">
+                  <h2 style="color: #d32f2f;">Bạn đã bị vượt giá!</h2>
+                  <p>Có người vừa ra giá cao hơn cho sản phẩm <b>%s</b>.</p>
+                  <p>Giá hiện tại: <b>%s VNĐ</b></p>
+                  <p>Hãy ra giá lại ngay để giành chiến thắng!</p>
+                  <a href="%s" style="display: inline-block; padding: 10px 20px; background-color: #d32f2f; color: white; text-decoration: none; border-radius: 5px;">Đấu giá ngay</a>
+              </div>
+          </body>
+          </html>
+          """
+          .formatted(productName, newPrice, productLink);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+      log.info("Outbid Email sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send Outbid email to {}", to, e);
+    }
+  }
+
+  @Async
+  public void sendAuctionEndedNotification(String to, String productName, java.math.BigDecimal finalPrice,
+      boolean isWinner, String productLink) {
+    try {
+      jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+      org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(
+          message, true, "UTF-8");
+
+      helper.setTo(to);
+      String subject = isWinner ? "Chúc mừng! Bạn đã thắng đấu giá: " + productName
+          : "Phiên đấu giá kết thúc: " + productName;
+      helper.setSubject(subject);
+
+      String content = isWinner
+          ? "<p>Chúc mừng bạn đã thắng sản phẩm <b>%s</b> với giá <b>%s VNĐ</b>.</p><p>Vui lòng thanh toán để hoàn tất đơn hàng.</p>"
+              .formatted(productName, finalPrice)
+          : "<p>Phiên đấu giá sản phẩm <b>%s</b> của bạn đã kết thúc.</p><p>Giá cuối cùng: <b>%s VNĐ</b>.</p>"
+              .formatted(productName, finalPrice);
+
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px;">
+                  <h2 style="color: #2e7d32;">%s</h2>
+                  %s
+                  <a href="%s" style="display: inline-block; padding: 10px 20px; background-color: #2e7d32; color: white; text-decoration: none; border-radius: 5px;">Xem chi tiết</a>
+              </div>
+          </body>
+          </html>
+          """
+          .formatted(subject, content, productLink);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+      log.info("Auction End Email sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send Auction End email to {}", to, e);
+    }
+  }
+
+  @Async
+  public void sendBidderBlockedNotification(String to, String productName, String sellerName, String productLink) {
+    try {
+      jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+      org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(
+          message, true, "UTF-8");
+
+      helper.setTo(to);
+      helper.setSubject("Thông báo từ chối ra giá: " + productName);
+
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px;">
+                  <h2 style="color: #d32f2f;">Bạn đã bị từ chối ra giá</h2>
+                  <p>Xin chào,</p>
+                  <p>Người bán <b>%s</b> đã chặn bạn tham gia đấu giá sản phẩm <b>%s</b>.</p>
+                  <p>Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ người bán.</p>
+                  <p>Các lượt ra giá tự động của bạn cho sản phẩm này (nếu có) đã bị hủy.</p>
+                  <a href="%s" style="display: inline-block; padding: 10px 20px; background-color: #555; color: white; text-decoration: none; border-radius: 5px;">Xem sản phẩm</a>
+              </div>
+          </body>
+          </html>
+          """
+          .formatted(sellerName, productName, productLink);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+      log.info("Blocked Bidder Email sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send Blocked Bidder email to {}", to, e);
+    }
+  }
 }

@@ -24,6 +24,7 @@ public class AutoBidServiceImpl implements AutoBidService {
     private final ProductRepository productRepository;
     private final BidRepository bidRepository;
     private final NotificationService notificationService;
+    private final com.auction.auction_backend.modules.notification.service.EmailService emailService;
 
     @Override
     @Transactional
@@ -69,18 +70,57 @@ public class AutoBidServiceImpl implements AutoBidService {
 
     private void updateProduct(Product product, User newWinner, BigDecimal newPrice) {
         User oldWinner = product.getCurrentWinner();
+        String productLink = "http://localhost:5173/products/" + product.getId(); // TODO: Use config
 
+        // 1. Notify Old Winner (Outbid)
         if (oldWinner != null && !oldWinner.getId().equals(newWinner.getId())) {
             try {
+                // In-app notification
                 notificationService.sendNotification(
                         oldWinner,
                         "Bạn đã bị vượt mặt!",
                         "Sản phẩm '" + product.getTitle() + "' vừa có người đặt giá cao hơn: " + newPrice,
-                        "/products/" + product.getId(), // Link tới sản phẩm
+                        "/products/" + product.getId(),
                         "OUTBID");
+
+                // Email notification
+                emailService.sendOutbidNotification(
+                        oldWinner.getEmail(),
+                        product.getTitle(),
+                        newPrice,
+                        productLink);
             } catch (Exception e) {
-                log.error("Lỗi gửi thông báo: {}", e.getMessage());
+                log.error("Lỗi gửi thông báo outbid: {}", e.getMessage());
             }
+        }
+
+        // 2. Notify New Winner (Bid Success)
+        // Avoid sending if new winner is same as old winner (e.g. auto bid increment) -
+        // though requirement says "Confirm bid".
+        // Depending on UX, we might want to notify every time price increases or just
+        // when they become winner.
+        // Let's notify every time price confirms for them.
+        try {
+            emailService.sendBidPlacedNotification(
+                    newWinner.getEmail(),
+                    product.getTitle(),
+                    newPrice,
+                    productLink,
+                    false);
+        } catch (Exception e) {
+            log.error("Lỗi gửi email bid success: {}", e.getMessage());
+        }
+
+        // 3. Notify Seller (New Bid)
+        try {
+            emailService.sendBidPlacedNotification(
+                    product.getSeller().getEmail(),
+                    product.getTitle(),
+                    newPrice,
+                    productLink,
+                    true);
+        } catch (Exception e) {
+            log.error("Lỗi gửi email seller: {}", e.getMessage());
         }
 
         product.setCurrentPrice(newPrice);

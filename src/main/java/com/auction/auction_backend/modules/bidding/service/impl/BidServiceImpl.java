@@ -7,6 +7,8 @@ import com.auction.auction_backend.common.exception.ErrorCode;
 import com.auction.auction_backend.modules.bidding.dto.request.PlaceBidRequest;
 import com.auction.auction_backend.modules.bidding.entity.AutoBidMax;
 import com.auction.auction_backend.modules.bidding.repository.AutoBidRepository;
+import com.auction.auction_backend.modules.bidding.repository.BidRepository;
+import com.auction.auction_backend.modules.bidding.repository.BlockedBidderRepository;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
 import com.auction.auction_backend.modules.user.entity.User;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.auction.auction_backend.modules.notification.service.EmailService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,8 +31,9 @@ public class BidServiceImpl implements BidService {
     private final UserRepository userRepository;
     private final AutoBidRepository autoBidRepository;
     private final AutoBidService autoBidService;
-    private final com.auction.auction_backend.modules.bidding.repository.BlockedBidderRepository blockedBidderRepository;
-    private final com.auction.auction_backend.modules.bidding.repository.BidRepository bidRepository;
+    private final BlockedBidderRepository blockedBidderRepository;
+    private final BidRepository bidRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -97,6 +101,18 @@ public class BidServiceImpl implements BidService {
 
         // Retrigger calculation
         autoBidService.triggerAutoBid(product);
+
+        // Notify blocked user
+        try {
+            String productLink = "http://localhost:5173/products/" + product.getId(); // TODO: config
+            emailService.sendBidderBlockedNotification(
+                    bidder.getEmail(),
+                    product.getTitle(),
+                    product.getSeller().getFullName(),
+                    productLink);
+        } catch (Exception e) {
+            // log
+        }
     }
 
     private void validateBid(Product product, User bidder, BigDecimal inputMaxAmount) {

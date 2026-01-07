@@ -28,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
         private final com.auction.auction_backend.modules.user.service.RatingService ratingService;
         private final ProductRepository productRepository;
         private final UserRepository userRepository;
+        private final com.auction.auction_backend.modules.notification.service.EmailService emailService;
 
         @Override
         @Transactional
@@ -105,13 +106,60 @@ public class OrderServiceImpl implements OrderService {
         @Override
         @Transactional
         public void createOrderFromAuction(Product product) {
+                String productLink = "http://localhost:5173/products/" + product.getId(); // TODO: Config
+
+                // Case: No Winner (Unsold)
                 if (product.getStatus() != com.auction.auction_backend.common.enums.ProductStatus.SOLD) {
-                        if (product.getCurrentWinner() == null)
+                        if (product.getCurrentWinner() == null) {
+                                // Notify Seller: Unsold
+                                try {
+                                        emailService.sendAuctionEndedNotification(
+                                                        product.getSeller().getEmail(),
+                                                        product.getTitle(),
+                                                        product.getCurrentPrice(),
+                                                        false, // Not used for seller in this template really, but let's
+                                                               // check template
+                                                        productLink);
+                                        // Wait, my template for Auction End distinguishes Winner vs Seller check?
+                                        // Template: subject = isWinner ? ... : "Phiên đấu giá kết thúc"
+                                        // Content = isWinner ? ... : "Phiên đấu giá ... đã kết thúc."
+                                        // So for Seller (Unsold), isWinner=false is correct context "Auction Ended".
+                                } catch (Exception e) {
+                                        // log
+                                }
                                 return;
+                        }
                 }
 
                 if (orderRepository.findByProductId(product.getId()).isPresent()) {
                         return;
+                }
+
+                User winner = product.getCurrentWinner();
+                com.auction.auction_backend.modules.user.entity.User seller = product.getSeller();
+
+                // Notify Winner: Won
+                try {
+                        emailService.sendAuctionEndedNotification(
+                                        winner.getEmail(),
+                                        product.getTitle(),
+                                        product.getCurrentPrice(),
+                                        true,
+                                        productLink);
+                } catch (Exception e) {
+                        // log
+                }
+
+                // Notify Seller: Sold
+                try {
+                        emailService.sendAuctionEndedNotification(
+                                        seller.getEmail(),
+                                        product.getTitle(),
+                                        product.getCurrentPrice(),
+                                        false, // isWinner=false -> "Auction Ended" message.
+                                        productLink);
+                } catch (Exception e) {
+                        // log
                 }
 
                 Order order = Order.builder()
