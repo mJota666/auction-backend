@@ -29,31 +29,54 @@ public class AutoBidServiceImpl implements AutoBidService {
     @Override
     @Transactional
     public void triggerAutoBid(Product product) {
+        log.info("[DEBUG_BID] triggerAutoBid START for ProductId: {}", product.getId());
         List<AutoBidMax> ranking = autoBidRepository.findSortedBids(product.getId());
+        log.info("[DEBUG_BID] Ranking Size: {}", ranking.size());
 
-        if (ranking.isEmpty())
+        if (ranking.isEmpty()) {
+            log.info("[DEBUG_BID] Ranking is empty, returning.");
             return;
+        }
+
+        for (int i = 0; i < ranking.size(); i++) {
+            log.info("[DEBUG_BID] Rank {}: User {} - Max {}", i, ranking.get(i).getBidder().getEmail(),
+                    ranking.get(i).getMaxAmount());
+        }
 
         if (ranking.size() == 1) {
             AutoBidMax winner = ranking.get(0);
+            log.info("[DEBUG_BID] Single bidder case: {}", winner.getBidder().getEmail());
             if (product.getCurrentWinner() == null) {
+                log.info("[DEBUG_BID] Setting initial winner: {} at StartPrice: {}", winner.getBidder().getEmail(),
+                        product.getStartPrice());
                 updateProduct(product, winner.getBidder(), product.getStartPrice());
+            } else {
+                log.info("[DEBUG_BID] Winner already exists (User: {}). No change in price.",
+                        product.getCurrentWinner().getEmail());
             }
             return;
         }
 
         AutoBidMax top1 = ranking.get(0);
         AutoBidMax top2 = ranking.get(1);
+        log.info("[DEBUG_BID] Top1: {} (Max: {}) | Top2: {} (Max: {})",
+                top1.getBidder().getEmail(), top1.getMaxAmount(),
+                top2.getBidder().getEmail(), top2.getMaxAmount());
 
         BigDecimal newPrice = top2.getMaxAmount().add(product.getStepPrice());
+        log.info("[DEBUG_BID] Calculated New Price (Top2 + Step): {}", newPrice);
 
         if (newPrice.compareTo(top1.getMaxAmount()) > 0) {
             newPrice = top1.getMaxAmount();
+            log.info("[DEBUG_BID] New Price capped at Top1 Max: {}", newPrice);
         }
 
+        log.info("[DEBUG_BID] Current Price: {}", product.getCurrentPrice());
         boolean priceChanged = newPrice.compareTo(product.getCurrentPrice()) != 0;
         boolean winnerChanged = product.getCurrentWinner() == null
                 || !product.getCurrentWinner().getId().equals(top1.getBidder().getId());
+
+        log.info("[DEBUG_BID] PriceChanged: {} | WinnerChanged: {}", priceChanged, winnerChanged);
 
         if (priceChanged || winnerChanged) {
             Bid bidHistory = Bid.builder()
@@ -64,7 +87,10 @@ public class AutoBidServiceImpl implements AutoBidService {
                     .bidType(com.auction.auction_backend.common.enums.BidType.AUTO)
                     .build();
             bidRepository.save(bidHistory);
+            log.info("[DEBUG_BID] Saved Bid History: Amount {}", newPrice);
             updateProduct(product, top1.getBidder(), newPrice);
+        } else {
+            log.info("[DEBUG_BID] No change in price or winner. Nothing processed.");
         }
     }
 

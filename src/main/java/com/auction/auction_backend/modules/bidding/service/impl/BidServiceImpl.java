@@ -15,6 +15,7 @@ import com.auction.auction_backend.modules.user.entity.User;
 import com.auction.auction_backend.modules.user.repository.UserRepository;
 import com.auction.auction_backend.security.userdetail.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BidServiceImpl implements BidService {
 
     private final ProductRepository productRepository;
@@ -38,6 +40,8 @@ public class BidServiceImpl implements BidService {
     @Override
     @Transactional
     public void placeBid(PlaceBidRequest request) {
+        log.info("[DEBUG_BID] placeBid called for ProductId: {}, Amount: {}", request.getProductId(),
+                request.getAmount());
         UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         User bidder = userRepository.findById(currentUser.getId())
@@ -55,9 +59,16 @@ public class BidServiceImpl implements BidService {
                         .maxAmount(BigDecimal.ZERO)
                         .build());
 
+        log.info("[DEBUG_BID] Current AutoBid Max for User {}: {}", bidder.getEmail(), autoBid.getMaxAmount());
+
         if (request.getAmount().compareTo(autoBid.getMaxAmount()) > 0) {
+            log.info("[DEBUG_BID] Updating AutoBid Max to {}", request.getAmount());
             autoBid.setMaxAmount(request.getAmount());
-            autoBidRepository.save(autoBid);
+            autoBidRepository.saveAndFlush(autoBid);
+            log.info("[DEBUG_BID] AutoBid saved");
+        } else {
+            log.info("[DEBUG_BID] Input amount {} is not greater than current Max {}, skipping save",
+                    request.getAmount(), autoBid.getMaxAmount());
         }
 
         // Auto Extension Logic
@@ -67,6 +78,7 @@ public class BidServiceImpl implements BidService {
             productRepository.save(product);
         }
 
+        log.info("[DEBUG_BID] Calling triggerAutoBid");
         autoBidService.triggerAutoBid(product);
     }
 

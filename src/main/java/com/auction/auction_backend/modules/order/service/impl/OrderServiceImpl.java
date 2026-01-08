@@ -117,21 +117,25 @@ public class OrderServiceImpl implements OrderService {
                                                         product.getSeller().getEmail(),
                                                         product.getTitle(),
                                                         product.getCurrentPrice(),
-                                                        false, // Not used for seller in this template really, but let's
-                                                               // check template
+                                                        false,
                                                         productLink);
-                                        // Wait, my template for Auction End distinguishes Winner vs Seller check?
-                                        // Template: subject = isWinner ? ... : "Phiên đấu giá kết thúc"
-                                        // Content = isWinner ? ... : "Phiên đấu giá ... đã kết thúc."
-                                        // So for Seller (Unsold), isWinner=false is correct context "Auction Ended".
                                 } catch (Exception e) {
                                         // log
                                 }
+                                // Update status to UNSOLD to prevent picking up again
+                                product.setStatus(com.auction.auction_backend.common.enums.ProductStatus.UNSOLD);
+                                productRepository.save(product);
                                 return;
                         }
                 }
 
                 if (orderRepository.findByProductId(product.getId()).isPresent()) {
+                        // Update status just in case it was missed (e.g. legacy data), though Order
+                        // exists implies it's handled.
+                        if (product.getStatus() == com.auction.auction_backend.common.enums.ProductStatus.ACTIVE) {
+                                product.setStatus(com.auction.auction_backend.common.enums.ProductStatus.SOLD);
+                                productRepository.save(product);
+                        }
                         return;
                 }
 
@@ -172,6 +176,10 @@ public class OrderServiceImpl implements OrderService {
                                 .build();
 
                 orderRepository.save(order);
+
+                // Update product status to SOLD
+                product.setStatus(com.auction.auction_backend.common.enums.ProductStatus.SOLD);
+                productRepository.save(product);
         }
 
         @Override

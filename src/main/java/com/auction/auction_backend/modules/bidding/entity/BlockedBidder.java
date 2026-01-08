@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "blocked_bidders", uniqueConstraints = {
+@Table(name = "blocked_bidder_list", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "product_id", "user_id" })
 })
 public class BlockedBidder extends BaseEntity {
