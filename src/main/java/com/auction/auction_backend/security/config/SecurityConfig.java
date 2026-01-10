@@ -23,6 +23,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
+    private final com.auction.auction_backend.security.ratelimit.RateLimitFilter rateLimitFilter;
     private final PasswordEncoder passwordEncoder;
 
     @Bean
@@ -53,6 +54,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class); // Rate Limit comes first
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

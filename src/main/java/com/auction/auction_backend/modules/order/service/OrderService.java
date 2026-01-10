@@ -21,4 +21,8 @@ public interface OrderService {
     void createOrderFromAuction(com.auction.auction_backend.modules.product.entity.Product product);
 
     void cancelOrder(Long orderId);
+
+    void uploadPaymentProof(Long orderId, String proofUrl);
+
+    void uploadShippingProof(Long orderId, String proofUrl);
 }

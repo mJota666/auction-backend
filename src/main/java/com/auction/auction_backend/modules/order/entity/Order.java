@@ -51,4 +51,10 @@ public class Order extends BaseEntity {
 
     @Column(name = "payment_ref_id")
     private String paymentRefId;
+
+    @Column(name = "payment_proof_url")
+    private String paymentProofUrl;
+
+    @Column(name = "shipping_proof_url")
+    private String shippingProofUrl;
 }

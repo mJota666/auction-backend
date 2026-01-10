@@ -208,4 +208,50 @@ public class OrderServiceImpl implements OrderService {
                 ratingRequest.setComment("Người thắng không thanh toán (Hủy tự động bởi người bán)");
                 ratingService.createRating(ratingRequest);
         }
+
+        @Override
+        @Transactional
+        public void uploadPaymentProof(Long orderId, String proofUrl) {
+                UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                                .getPrincipal();
+                Order order = orderRepository.findById(orderId)
+                                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+                if (!order.getWinner().getId().equals(currentUser.getId())) {
+                        throw new RuntimeException("Bạn không phải là người mua của đơn hàng này");
+                }
+
+                order.setPaymentProofUrl(proofUrl);
+                // Only update status if it's currently PENDING_PAYMENT
+                if (order.getStatus() == OrderStatus.PENDING_PAYMENT) {
+                        order.setStatus(OrderStatus.PAID);
+                        order.setPaidAt(java.time.LocalDateTime.now());
+                }
+                orderRepository.save(order);
+        }
+
+        @Override
+        @Transactional
+        public void uploadShippingProof(Long orderId, String proofUrl) {
+                UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
+                                .getPrincipal();
+                Order order = orderRepository.findById(orderId)
+                                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+                if (!order.getSeller().getId().equals(currentUser.getId())) {
+                        throw new RuntimeException("Bạn không phải là người bán của đơn hàng này");
+                }
+
+                if (order.getStatus() != OrderStatus.PAID && order.getStatus() != OrderStatus.SHIPPED) {
+                        // Allow re-upload if SHIPPED, but normally requires PAID first
+                        throw new RuntimeException(
+                                        "Người mua chưa thanh toán hoặc đơn hàng đang ở trạng thái không hợp lệ");
+                }
+
+                order.setShippingProofUrl(proofUrl);
+                if (order.getStatus() == OrderStatus.PAID) {
+                        order.setStatus(OrderStatus.SHIPPED);
+                }
+                orderRepository.save(order);
+        }
 }

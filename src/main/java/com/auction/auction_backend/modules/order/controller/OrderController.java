@@ -48,4 +48,20 @@ public class OrderController {
         orderService.updateOrderStatus(id, status);
         return ResponseEntity.ok(BaseResponse.success("Cập nhật trạng thái đơn hàng thành công"));
     }
+
+    @PostMapping("/{id}/payment-proof")
+    public ResponseEntity<BaseResponse<String>> uploadPaymentProof(
+            @PathVariable Long id,
+            @RequestBody @Valid com.auction.auction_backend.modules.order.dto.request.UploadProofRequest request) {
+        orderService.uploadPaymentProof(id, request.getProofUrl());
+        return ResponseEntity.ok(BaseResponse.success("Cập nhật minh chứng thanh toán thành công"));
+    }
+
+    @PostMapping("/{id}/shipping-proof")
+    public ResponseEntity<BaseResponse<String>> uploadShippingProof(
+            @PathVariable Long id,
+            @RequestBody @Valid com.auction.auction_backend.modules.order.dto.request.UploadProofRequest request) {
+        orderService.uploadShippingProof(id, request.getProofUrl());
+        return ResponseEntity.ok(BaseResponse.success("Cập nhật minh chứng vận chuyển thành công"));
+    }
 }
