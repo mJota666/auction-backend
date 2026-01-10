@@ -12,4 +12,5 @@ public class ProductSearchCriteria {
     private int size = 10;
     private com.auction.auction_backend.common.enums.ProductStatus status;
     private Boolean includeAllStatuses;
+    private Long sellerId;
 }

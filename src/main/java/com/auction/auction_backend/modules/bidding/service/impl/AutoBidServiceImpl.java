@@ -25,6 +25,7 @@ public class AutoBidServiceImpl implements AutoBidService {
     private final BidRepository bidRepository;
     private final NotificationService notificationService;
     private final com.auction.auction_backend.modules.notification.service.EmailService emailService;
+    private final com.auction.auction_backend.modules.product.service.ProductStreamService productStreamService;
 
     @Override
     @Transactional
@@ -121,11 +122,6 @@ public class AutoBidServiceImpl implements AutoBidService {
         }
 
         // 2. Notify New Winner (Bid Success)
-        // Avoid sending if new winner is same as old winner (e.g. auto bid increment) -
-        // though requirement says "Confirm bid".
-        // Depending on UX, we might want to notify every time price increases or just
-        // when they become winner.
-        // Let's notify every time price confirms for them.
         try {
             emailService.sendBidPlacedNotification(
                     newWinner.getEmail(),
@@ -153,5 +149,22 @@ public class AutoBidServiceImpl implements AutoBidService {
         product.setCurrentWinner(newWinner);
         productRepository.save(product);
         log.info("Product {} - New Price: {} - Winner: {}", product.getId(), newPrice, newWinner.getEmail());
+
+        // Broadcast update via SSE
+        productStreamService.broadcastProductUpdate(
+                product.getId(),
+                newPrice,
+                maskBidderName(newWinner.getFullName()));
+    }
+
+    private String maskBidderName(String fullName) {
+        if (fullName == null || fullName.isBlank()) {
+            return "****User";
+        }
+        String[] parts = fullName.trim().split("\\s+");
+        if (parts.length > 0) {
+            return "****" + parts[parts.length - 1];
+        }
+        return "****User";
     }
 }

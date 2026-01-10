@@ -30,6 +30,15 @@ public class ProductController {
         return ResponseEntity.ok(BaseResponse.success(productService.searchProducts(criteria)));
     }
 
+    @GetMapping("/seller/me")
+    public ResponseEntity<BaseResponse<Page<ProductResponse>>> getMyProducts(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.auction.auction_backend.security.userdetail.UserPrincipal currentUser,
+            @ModelAttribute ProductSearchCriteria criteria) {
+        criteria.setSellerId(currentUser.getId());
+        criteria.setIncludeAllStatuses(true); // Sellers can see all their products (active, draft, ended, etc.)
+        return ResponseEntity.ok(BaseResponse.success(productService.searchProducts(criteria)));
+    }
+
     @PostMapping
     public ResponseEntity<BaseResponse<String>> createProduct(@RequestBody @Valid CreateProductRequest request) {
         productService.createProduct(request);
