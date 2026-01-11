@@ -50,6 +50,17 @@ public class AutoBidServiceImpl implements AutoBidService {
             if (product.getCurrentWinner() == null) {
                 log.info("[DEBUG_BID] Setting initial winner: {} at StartPrice: {}", winner.getBidder().getEmail(),
                         product.getStartPrice());
+
+                // Record official bid history for the first bidder
+                Bid firstBid = Bid.builder()
+                        .product(product)
+                        .bidder(winner.getBidder())
+                        .bidAmount(product.getStartPrice())
+                        .maxAmount(winner.getMaxAmount())
+                        .bidType(com.auction.auction_backend.common.enums.BidType.AUTO)
+                        .build();
+                bidRepository.save(firstBid);
+
                 updateProduct(product, winner.getBidder(), product.getStartPrice());
             } else {
                 log.info("[DEBUG_BID] Winner already exists (User: {}). No change in price.",

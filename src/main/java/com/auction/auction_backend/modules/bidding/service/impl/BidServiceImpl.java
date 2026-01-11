@@ -74,6 +74,18 @@ public class BidServiceImpl implements BidService {
                     request.getAmount(), autoBid.getMaxAmount());
         }
 
+        // Record the manual bid action to ensure user sees this product in 'My Bids'
+        com.auction.auction_backend.modules.bidding.entity.Bid manualBid = com.auction.auction_backend.modules.bidding.entity.Bid
+                .builder()
+                .product(product)
+                .bidder(bidder)
+                .bidAmount(request.getAmount())
+                .maxAmount(request.getAmount())
+                .bidType(com.auction.auction_backend.common.enums.BidType.MANUAL)
+                .build();
+        bidRepository.save(manualBid);
+        log.info("[DEBUG_BID] Recorded manual bid for user: {}", bidder.getEmail());
+
         // Auto Extension Logic
         if (product.isAutoExtendEnabled() &&
                 product.getEndAt().isBefore(java.time.LocalDateTime.now().plusMinutes(5))) {

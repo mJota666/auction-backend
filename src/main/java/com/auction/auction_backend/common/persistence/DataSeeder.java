@@ -72,6 +72,8 @@ public class DataSeeder implements CommandLineRunner {
 
                 // 2. Categories
                 Category electronics = createCategory("Điện tử", null);
+                Category tablets = createCategory("Máy tính bảng", electronics.getId());
+
                 Category phones = createCategory("Điện thoại", electronics.getId());
                 Category laptops = createCategory("Laptop", electronics.getId());
                 Category accessories = createCategory("Phụ kiện", electronics.getId());
@@ -91,6 +93,21 @@ public class DataSeeder implements CommandLineRunner {
 
                 // 3. Products (giữ như bạn seed)
                 // --- Electronics ---
+                createProduct(seller, tablets, "iPad Pro 11 inch M4 WiFi 256GB",
+                                "<p><strong>iPad Pro M4</strong> siêu mỏng nhẹ, hiệu năng cực mạnh cho học tập & sáng tạo.</p>"
+                                                + "<ul>"
+                                                + "<li>Chip Apple M4</li>"
+                                                + "<li>Màn hình Ultra Retina XDR (OLED)</li>"
+                                                + "<li>Hỗ trợ Apple Pencil Pro</li>"
+                                                + "</ul>",
+                                new BigDecimal("10000000"), new BigDecimal("29000000"),
+                                List.of(
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/f/r/frame_100_1_2__2_2.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad-pro-m4-11-inch_3_.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad-pro-m4-11-inch_3_.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad-pro-m4-11-inch_6_.png"),
+                                bidder1, bidder2);
+
                 createProduct(seller, phones, "iPhone 15 Pro Max Titanium 256GB",
                                 "<p><strong>iPhone 15 Pro Max</strong> thiết kế titan chuẩn hàng không vũ trụ.</p><ul><li>Chip A17 Pro mạnh mẽ.</li><li>Camera 48MP chuyên nghiệp.</li><li>Nút Action mới.</li></ul>",
                                 new BigDecimal("28000000"), new BigDecimal("35000000"),

@@ -1,0 +1,389 @@
+commit a5b7b2206d0c4e8bac088293c5e6d6e91c540ffc
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 22:32:37 2026 +0700
+
+    Add clean application.yaml (use env vars for secrets)
+
+commit c23c31ca5812e21ba7738d83a713ed7f3a487522
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 22:26:27 2026 +0700
+
+    feat(db): update seed
+
+commit 65f0bf5066975ebefb66f42d037e05043c7ca57f
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 20:49:22 2026 +0700
+
+    feat(db): update seed
+
+commit 25344228ec61b6d2a0b3d9e9d743af4f61eb65eb
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 19:45:11 2026 +0700
+
+    feat(db): update seed
+
+commit b603e0f683854ff8e646c27ea0d8b84c179db712
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 19:08:32 2026 +0700
+
+    feat(admin): fix cascade failure when delete user
+
+commit 7ebc44d6615ff997553d1d82a123ac1582a56221
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 19:08:11 2026 +0700
+
+    feat(admin): fix cascade failure when delete user
+
+commit 3ac37b06a22a0da8f4e16e951a8a398632e26d2d
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 18:49:01 2026 +0700
+
+    feat(admin): uallow admin to delete user and reset user's password
+
+commit f82fdcb6bb0cbdaec710ae9f019d41edf76a7d60
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 18:39:40 2026 +0700
+
+    feat(user): add view asessement detail of user
+
+commit 045718dcc252529c14ac4a6d750a1ee5f0ee1831
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 17:59:41 2026 +0700
+
+    feat(seller): fix block user flow
+
+commit a9958b9b29f7903b98faa496fe4361e0893cb8ab
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 16:24:08 2026 +0700
+
+    feat(product): fix transaction
+
+commit c33bdae7e32d6ab9ae5e082f33aa82fd72711670
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 15:39:58 2026 +0700
+
+    feat(user): allow anonymous user to access cate and product list
+
+commit f4bb01de976adf3d7540b0ad8b6fac54813169e7
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 15:39:31 2026 +0700
+
+    feat(sort): add field count by bidder
+
+commit 3a404b138fdd2f9466c8e963c206b6636da70676
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 15:39:05 2026 +0700
+
+    feat(db): update seed
+
+commit 32438b1acbdcac2c6748a61d8178bf08b7d043e9
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 15:38:52 2026 +0700
+
+    feat(bid): fix display bidder information depend on seller/bidder
+
+commit a9c1e281e6530b9792e69f75321cd1185c33c7b4
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 14:13:38 2026 +0700
+
+    feat(db): seed database
+
+commit 8af12edf41acdb5d8d912d0012ee79289fff0adf
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 12:12:14 2026 +0700
+
+    feat(logging): establish ELK Stack
+
+commit 673f2ac350ca0594b388154da74abb211b513986
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 11:47:50 2026 +0700
+
+    feat(api_doc): handle api documentation
+
+commit f61bf616b979799efe2b957838d5e44b7aaf89e0
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 10:48:44 2026 +0700
+
+    feat(bidder): fix block bidder
+
+commit 551a911139791192f2f6a8439064320e7f9da160
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Jan 11 09:39:17 2026 +0700
+
+    feat(rate-limit): add rate limit
+
+commit 97a45712f037c87d446ee5517e8445f6dd6f4920
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sat Jan 10 15:01:02 2026 +0700
+
+    feat(user): add api for upload proof image, add rate-limit filter
+
+commit f3ecff858e87065de29b311b60df804aa5910b34
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sat Jan 10 13:40:56 2026 +0700
+
+    feat(user): product fetch fix
+
+commit 5f257e0ef571d30e317d1f2bf83c0e587bf57a8c
+Author: mJota666 <micode2744@gmail.com>
+Date:   Fri Jan 9 06:37:52 2026 +0700
+
+    feat(bid): add log in bidding
+
+commit 8a241bb8a3e24aa809fcc0e59323af5bdc23ca9c
+Author: mJota666 <micode2744@gmail.com>
+Date:   Wed Jan 7 17:43:47 2026 +0700
+
+    feat(seller): fix allow unrated bidder
+
+commit f854822adc091a1576ea77bd461a777b83f2539d
+Author: mJota666 <micode2744@gmail.com>
+Date:   Wed Jan 7 17:06:50 2026 +0700
+
+    feat(notification): add notification system
+
+commit 425e28c3254fc1b91ef38d3f436854f1499706bb
+Author: mJota666 <micode2744@gmail.com>
+Date:   Wed Jan 7 15:52:40 2026 +0700
+
+    feat(admin): add delete product api
+
+commit 64becc22f724e4a698fdd577df8a48da3f0e18f7
+Author: mJota666 <micode2744@gmail.com>
+Date:   Wed Jan 7 15:08:04 2026 +0700
+
+    feat(admin): finish admin
+
+commit 52324a2b641783eccc762cba26563b677daddd59
+Author: mJota666 <micode2744@gmail.com>
+Date:   Tue Jan 6 22:46:45 2026 +0700
+
+    feat(admin): fix admin manage user
+
+commit c10fee5d692878a30e38838d2e20c95147219590
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 20:20:24 2026 +0700
+
+    feat(user): fix remove product from watch list
+
+commit 70ddcfa334ff43f61b5c427d3b73a01a3a4593c0
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 19:29:24 2026 +0700
+
+    feat(user_profile): add api to view bidding history
+
+commit 038b0e05c36ab15ca8a59177bee30c5e8b46ab27
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 18:32:57 2026 +0700
+
+    feat(user_profile): Error in return user assessmented history
+
+commit 2e1297c4b9ff5dd1de9e040774c3fda4a8a476d5
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 18:22:11 2026 +0700
+
+    feat(auth): add exception for not correct login infomation
+
+commit cada68458cff9dfaa7bd7c9a22a149148b31cf4d
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 16:23:46 2026 +0700
+
+    feat(auth): update user response with dob and address
+
+commit 2cdfaa239c4a17d034aa60cb12dac21d6cacdae6
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 16:05:19 2026 +0700
+
+    feat(auth): adjust register field, add dob and address
+
+commit 0c9fea3fafc49bece513af38a979b3df84d43d73
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 15:57:58 2026 +0700
+
+    feat(admin): finish admin flow
+
+commit ba86419eb4a0c1c73bd5cedc1985ec0905453e0c
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 11:55:00 2026 +0700
+
+    feat(seller): adjust seller flow
+
+commit a54c9d493b41f61a810f70f604057b60ef55522d
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Jan 5 10:50:25 2026 +0700
+
+    feat(admin): add check stats
+
+commit de8afc008178b58b063cda574a2b82c42cfd8229
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sat Jan 3 01:37:09 2026 +0700
+
+    feat(email): add email service
+
+commit 97bda45deff51783f2c84cdda062bfe0b0245026
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sat Jan 3 00:53:47 2026 +0700
+
+    feat(bid_server): add check unrated bidder
+
+commit c15f3578e323cad1f0b95b34b2f349edefd6a60f
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sat Jan 3 00:29:21 2026 +0700
+
+    feat(auth): refresh token implementation
+
+commit fa34d4026406268600dcc1fe029b2138953aba9a
+Author: mJota666 <micode2744@gmail.com>
+Date:   Fri Jan 2 23:46:34 2026 +0700
+
+    feat(user_rating): handle user rating
+
+commit fe9d0657d8b2c1c8dd19b3c26ec39e001a06e18b
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 19:37:05 2026 +0700
+
+    feat(auth_google): change template for OTP code
+
+commit b46fc62764182f8d0161fbce06016b8a7addbd91
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 19:13:19 2026 +0700
+
+    feat(auth_google): finish gg authentication
+
+commit 2cb06e24d56f1136ac65f46ca90955cdfc760e12
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 18:39:58 2026 +0700
+
+    feat(user_role): fixed user role
+
+commit d05858bbb5bb6b438e544f754878fdf11bcc164a
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 16:32:19 2026 +0700
+
+    feat(cat_api): query multi cat
+
+commit 4a44ed01459b68cef385df66f2eecc0999068238
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 16:14:12 2026 +0700
+
+    add api to query children cate
+
+commit 24c7af256c4ecfcf98e869ce366594d6b9fa9ef2
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 14:41:39 2026 +0700
+
+    add cascade to automatically add image into product_images
+
+commit 0e3c91304f68d20ea0c9a1d78fabeae960caee85
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 14:33:03 2026 +0700
+
+    utc handle
+
+commit 012e840815c9ad026753ee5ccbf934f0219014be
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 12:50:32 2026 +0700
+
+    final fix
+
+commit 1739c1b6337586044f7c4b8311fbf1e8b3295190
+Author: mJota666 <micode2744@gmail.com>
+Date:   Thu Jan 1 12:50:14 2026 +0700
+
+    overal fix
+
+commit 44aedd478229bc67977fa3d70ab0b439402f6940
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Dec 28 22:20:28 2025 +0700
+
+    feat(product-detail, auto-bid): add api for product-detail and fix auto-bid logic
+
+commit 4c8e893d67555e0ee7f64b34e7f6c6e8ccc8fd0a
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Dec 28 20:48:04 2025 +0700
+
+    feat(product): add top-5 api
+
+commit 06dba3103bc36e8853390cc9406727fb6b672692
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Dec 28 17:45:16 2025 +0700
+
+    feat(product): product search api
+
+commit 6b5c82ae8b3838df5acd9bb5e3384aa9c2afad55
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Dec 28 17:01:15 2025 +0700
+
+    feat(notification): add more api for notification
+
+commit ce892358bc1d319580d1c654220a1c428d729ecc
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Dec 28 16:02:34 2025 +0700
+
+    feat(notification): add log into notification
+
+commit ec985b36113f5d317a70125ae9ca56b059b8625f
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Dec 28 14:29:55 2025 +0700
+
+    feat(notification): integrate notification
+
+commit 5ca1a1c24ba0cabad296baefe9718f8f3dbecf1b
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sat Dec 27 20:04:28 2025 +0700
+
+    feat(payment): stripe payment integrated
+
+commit 38fc700a3edd7b81971b2945cd748c971215832e
+Author: mJota666 <micode2744@gmail.com>
+Date:   Fri Dec 26 23:09:18 2025 +0700
+
+    feat(order): initiate order flow
+
+commit 1babd0853ee70a3ec7c5bdbb04c468f4d577b212
+Author: mJota666 <micode2744@gmail.com>
+Date:   Fri Dec 26 20:47:01 2025 +0700
+
+    feat(exception): add ObjectOptimisticLockingFailureException
+
+commit 50b85772e64c12cb0eece1c9888b786007c2d7e1
+Author: mJota666 <micode2744@gmail.com>
+Date:   Fri Dec 26 20:37:30 2025 +0700
+
+    feat(bidding_api): finish bidding api
+
+commit 2cb45e07e5056f3111c9cfe235cb508f02fad629
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Dec 22 23:39:37 2025 +0700
+
+    feat(bid_api_manual): finish manual bid api
+
+commit 01ae2f2e6f1df83102bc876962aabd5138c5fa15
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Dec 22 15:14:52 2025 +0700
+
+    feat(product_api): finish add product_api
+
+commit 0cbc05eb339be48faba81b405d3f6a0e84b3d897
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sun Dec 21 22:34:58 2025 +0700
+
+    feat(auth_api): finish auth api
+
+commit 6dd54332ceb38ac2702795fe1cc8e4e0d519b7e1
+Author: mJota666 <micode2744@gmail.com>
+Date:   Sat Dec 20 23:53:33 2025 +0700
+
+    feat(jwt_config): jwt config
+
+commit 6b1687f6a5880626ae993c2993a7709fb0b66b50
+Author: mJota666 <micode2744@gmail.com>
+Date:   Fri Dec 19 22:42:13 2025 +0700
+
+    feat(config): add config
+
+commit 831a33f224bc72d60e6dd52da3f05db421462e3f
+Author: mJota666 <micode2744@gmail.com>
+Date:   Mon Dec 15 16:06:29 2025 +0700
+
+    Auction-Backend initialize project
