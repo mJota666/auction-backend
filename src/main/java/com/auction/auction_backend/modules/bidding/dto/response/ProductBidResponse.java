@@ -14,4 +14,6 @@ public class ProductBidResponse {
     private BigDecimal amount;
     private LocalDateTime time;
     private String bidderName; // Masked
+    private int ratingPositive;
+    private int ratingNegative;
 }

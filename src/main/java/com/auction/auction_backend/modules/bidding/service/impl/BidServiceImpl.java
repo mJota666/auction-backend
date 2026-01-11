@@ -214,6 +214,8 @@ public class BidServiceImpl implements BidService {
                         .time(bid.getCreatedAt())
                         .bidderName(com.auction.auction_backend.common.utils.AppUtils
                                 .maskName(bid.getBidder().getFullName()))
+                        .ratingPositive(bid.getBidder().getRatingPositive())
+                        .ratingNegative(bid.getBidder().getRatingNegative())
                         .build());
     }
 }
