@@ -31,6 +31,10 @@ public interface UserService {
 
     void banUser(Long userId, boolean ban);
 
+    void deleteUser(Long userId);
+
+    void resetUserPassword(Long userId);
+
     void requestUpgrade(Long userId, CreateUpgradeRequest request);
 
     UpgradeRequest getMyUpgradeRequest(Long userId);

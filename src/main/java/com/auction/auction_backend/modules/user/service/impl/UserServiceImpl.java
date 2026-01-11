@@ -5,6 +5,7 @@ import com.auction.auction_backend.common.enums.UpgradeRequestStatus;
 import com.auction.auction_backend.common.enums.UserRole;
 import com.auction.auction_backend.common.exception.AppException;
 import com.auction.auction_backend.common.exception.ErrorCode;
+import com.auction.auction_backend.modules.notification.service.EmailService;
 import com.auction.auction_backend.modules.product.dto.response.ProductResponse;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
@@ -37,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
     private final UpgradeRequestRepository upgradeRequestRepository;
+    private final EmailService emailService;
 
     @Override
     public User getProfile(Long userId) {
@@ -166,6 +168,36 @@ public class UserServiceImpl implements UserService {
         }
         user.setActive(!ban);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = getUserById(userId);
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new RuntimeException("Không thể xóa tài khoản Admin");
+        }
+        userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public void resetUserPassword(Long userId) {
+        User user = getUserById(userId);
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new RuntimeException("Cannot reset ADMIN password via this API");
+        }
+        String newPassword = java.util.UUID.randomUUID().toString().substring(0, 8); // Simple random password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Send email
+        try {
+            emailService.sendEmail(user.getEmail(), "Reset Password Notification",
+                    "Admin đã reset mật khẩu của bạn. Mật khẩu mới là: " + newPassword);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi gửi email: " + e.getMessage());
+        }
     }
 
     @Override

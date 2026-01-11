@@ -55,6 +55,20 @@ public class AdminController {
         return ResponseEntity.ok(BaseResponse.success(message));
     }
 
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BaseResponse<String>> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok(BaseResponse.success("Xóa người dùng thành công"));
+    }
+
+    @PostMapping("/users/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BaseResponse<String>> resetUserPassword(@PathVariable Long id) {
+        userService.resetUserPassword(id);
+        return ResponseEntity.ok(BaseResponse.success("Reset mật khẩu thành công. Email đã được gửi đến người dùng."));
+    }
+
     @GetMapping("/upgrade-requests")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<java.util.List<com.auction.auction_backend.modules.user.entity.UpgradeRequest>>> getUpgradeRequests() {
