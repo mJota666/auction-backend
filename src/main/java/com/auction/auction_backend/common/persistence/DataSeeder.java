@@ -6,12 +6,14 @@ import com.auction.auction_backend.common.enums.UserRole;
 import com.auction.auction_backend.common.utils.AppUtils;
 import com.auction.auction_backend.modules.bidding.entity.Bid;
 import com.auction.auction_backend.modules.bidding.repository.BidRepository;
+import com.auction.auction_backend.modules.order.repository.OrderRepository;
 import com.auction.auction_backend.modules.product.entity.Category;
 import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.entity.ProductImage;
 import com.auction.auction_backend.modules.product.repository.CategoryRepository;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
 import com.auction.auction_backend.modules.user.entity.User;
+import com.auction.auction_backend.modules.user.repository.RatingRepository;
 import com.auction.auction_backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,8 @@ public class DataSeeder implements CommandLineRunner {
         private final ProductRepository productRepository;
         private final BidRepository bidRepository;
         private final PasswordEncoder passwordEncoder;
+        private final OrderRepository orderRepository;
+        private final RatingRepository ratingRepository;
 
         @Override
         @Transactional
@@ -282,6 +286,20 @@ public class DataSeeder implements CommandLineRunner {
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/t/e/text_ng_n_6__5_119.png"),
                                 bidder1, bidder2);
 
+                // 4. Completed Orders & Ratings (for testing history)
+                createCompletedOrderAndRating(seller, bidder1, phones, "iPhone 14 Pro Max (Đã bán)",
+                                new BigDecimal("20000000"), 1, "Máy đẹp, giao hàng nhanh!");
+
+                createCompletedOrderAndRating(seller, bidder2, laptops, "MacBook Air M1 (Đã bán)",
+                                new BigDecimal("15000000"), 1, "Shop uy tín, đóng gói cẩn thận.");
+
+                createCompletedOrderAndRating(seller2, bidder1, accessories, "Chuột Logitech MX Master 3 (Đã bán)",
+                                new BigDecimal("2000000"), 1, "Hàng chính hãng, dùng rất sướng.");
+
+                // Negative rating example
+                createCompletedOrderAndRating(seller, bidder2, menFashion, "Quần Jean Rách (Đã bán)",
+                                new BigDecimal("500000"), -1, "Hàng không giống mô tả, rất thất vọng.");
+
                 log.info("Database seeded successfully!");
         }
 
@@ -320,8 +338,8 @@ public class DataSeeder implements CommandLineRunner {
                                 .buyNowPrice(buyNowPrice)
                                 .startAt(LocalDateTime.now().minusHours(1)) // Started 1 hour ago
                                 .endAt(LocalDateTime.now().plusMinutes(300 + new Random().nextInt(4300))) // Ends in 300
-                                                                                                          // mins to ~3
-                                                                                                          // days
+                                // mins to ~3
+                                // days
                                 .status(ProductStatus.ACTIVE)
                                 .autoExtendEnabled(true)
                                 .allowUnratedBidder(true)
@@ -372,5 +390,53 @@ public class DataSeeder implements CommandLineRunner {
                         bidRepository.save(bid);
                         product.setCurrentPrice(currentBidAmount);
                 }
+        }
+
+        private void createCompletedOrderAndRating(User seller, User winner, Category category, String productName,
+                        BigDecimal price, int score, String comment) {
+                // 1. Create a "Sold" product (past auction)
+                Product product = Product.builder()
+                                .seller(seller)
+                                .category(category)
+                                .title(productName)
+                                .titleNormalized(AppUtils.removeAccent(productName))
+                                .description("Sản phẩm này đã bán.")
+                                .startPrice(price.subtract(new BigDecimal("100000")))
+                                .currentPrice(price)
+                                .stepPrice(new BigDecimal("50000"))
+                                .buyNowPrice(price.add(new BigDecimal("1000000")))
+                                .startAt(LocalDateTime.now().minusDays(10))
+                                .endAt(LocalDateTime.now().minusDays(5)) // Ended 5 days ago
+                                .status(ProductStatus.SOLD)
+                                .currentWinner(winner) // Winner is set
+                                .autoExtendEnabled(true)
+                                .allowUnratedBidder(true)
+                                .build();
+                product = productRepository.save(product);
+
+                // 2. Create Order
+                com.auction.auction_backend.modules.order.entity.Order order = com.auction.auction_backend.modules.order.entity.Order
+                                .builder()
+                                .product(product)
+                                .seller(seller)
+                                .winner(winner)
+                                .finalPrice(price)
+                                .status(com.auction.auction_backend.common.enums.OrderStatus.DELIVERED) // Finished
+                                                                                                        // order
+                                .paymentMethod(com.auction.auction_backend.common.enums.PaymentMethod.COD)
+                                .shippingAddress("123 Seed Street, HCM")
+                                .build();
+                order = orderRepository.save(order);
+
+                // 3. Create Rating (Winner rates Seller)
+                com.auction.auction_backend.modules.user.entity.Rating rating = com.auction.auction_backend.modules.user.entity.Rating
+                                .builder()
+                                .order(order)
+                                .rater(winner)
+                                .ratedUser(seller)
+                                .score(score)
+                                .comment(comment)
+                                .build();
+                ratingRepository.save(rating);
         }
 }
