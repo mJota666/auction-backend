@@ -49,6 +49,7 @@ public class ProductDetailResponse extends ProductResponse {
                 .sellerName(sellerName)
                 .sellerId(product.getSeller() != null ? product.getSeller().getId() : null)
                 .currentWinnerName(winnerName)
+                .currentWinnerId(product.getCurrentWinner() != null ? product.getCurrentWinner().getId() : null)
                 .status(product.getStatus())
                 .thumbnailUrl(thumb)
                 .bidCount(product.getBids() != null ? product.getBids().size() : 0)

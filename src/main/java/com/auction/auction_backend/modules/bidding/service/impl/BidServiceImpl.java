@@ -189,6 +189,7 @@ public class BidServiceImpl implements BidService {
         return bidRepository.findByProductId(productId, pageable)
                 .map(bid -> com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse.builder()
                         .id(bid.getId())
+                        .bidderId(bid.getBidder().getId())
                         .amount(bid.getBidAmount())
                         .time(bid.getCreatedAt())
                         .bidderName(com.auction.auction_backend.common.utils.AppUtils

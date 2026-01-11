@@ -35,6 +35,7 @@ public class ProductResponse {
     private String sellerName;
     private Long sellerId;
     private String currentWinnerName;
+    private Long currentWinnerId;
     private int bidCount;
 
     public static ProductResponse fromEntity(Product product) {
@@ -44,10 +45,12 @@ public class ProductResponse {
         }
 
         String winnerName = null;
+        Long winnerId = null;
         if (product.getCurrentWinner() != null) {
             // Mask tên
             winnerName = com.auction.auction_backend.common.utils.AppUtils
                     .maskName(product.getCurrentWinner().getFullName());
+            winnerId = product.getCurrentWinner().getId();
         }
 
         String sellerName = (product.getSeller() != null) ? product.getSeller().getFullName() : "Unknown";
@@ -74,6 +77,7 @@ public class ProductResponse {
                 .sellerName(sellerName)
                 .sellerId(sellerId)
                 .currentWinnerName(winnerName)
+                .currentWinnerId(winnerId)
                 .bidCount(totalBids)
                 .build();
     }

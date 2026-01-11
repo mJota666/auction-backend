@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ProductBidResponse {
     private Long id;
+    private Long bidderId;
     private BigDecimal amount;
     private LocalDateTime time;
     private String bidderName; // Masked
