@@ -30,10 +30,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
         private final ProductRepository productRepository;
         private final CategoryRepository categoryRepository;
@@ -88,6 +90,8 @@ public class ProductServiceImpl implements ProductService {
                                 case "price_asc" -> sort = Sort.by(Sort.Direction.ASC, "currentPrice");
                                 case "price_desc" -> sort = Sort.by(Sort.Direction.DESC, "currentPrice");
                                 case "end_at_asc" -> sort = Sort.by(Sort.Direction.ASC, "endAt"); // Sắp hết hạn lên đầu
+                                case "bid_count_desc" -> sort = Sort.unsorted(); // Sử dụng logic trong
+                                                                                 // ProductSpecification
                         }
                 }
                 Pageable pageable = PageRequest.of(criteria.getPage(), criteria.getSize(), sort);
@@ -144,10 +148,21 @@ public class ProductServiceImpl implements ProductService {
                 if (product.getBids() == null)
                         return List.of();
 
+                // Get current user to check if they are the seller
+                boolean isSeller = false;
+                var authentication = SecurityContextHolder.getContext().getAuthentication();
+                if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {
+                        UserPrincipal currentUser = (UserPrincipal) authentication.getPrincipal();
+                        if (product.getSeller().getId().equals(currentUser.getId())) {
+                                isSeller = true;
+                        }
+                }
+
+                boolean finalIsSeller = isSeller;
                 return product.getBids().stream()
                                 .sorted((b1, b2) -> b2.getBidAmount().compareTo(b1.getBidAmount())) // Sắp xếp giá giảm
                                                                                                     // dần
-                                .map(BidHistoryResponse::fromEntity)
+                                .map(bid -> BidHistoryResponse.fromEntity(bid, finalIsSeller))
                                 .toList();
         }
 

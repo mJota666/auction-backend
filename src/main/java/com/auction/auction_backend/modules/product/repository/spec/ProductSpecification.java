@@ -41,6 +41,12 @@ public class ProductSpecification {
                 predicates.add(criteriaBuilder.equal(root.get("seller").get("id"), criteria.getSellerId()));
             }
 
+            if ("bid_count_desc".equals(criteria.getSortBy())) {
+                if (Long.class != query.getResultType()) {
+                    query.orderBy(criteriaBuilder.desc(criteriaBuilder.size(root.get("bids"))));
+                }
+            }
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
