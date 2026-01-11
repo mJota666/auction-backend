@@ -1,6 +1,7 @@
 package com.auction.auction_backend.common.persistence;
 
 import com.auction.auction_backend.common.enums.BidType;
+import com.auction.auction_backend.common.enums.OrderStatus;
 import com.auction.auction_backend.common.enums.ProductStatus;
 import com.auction.auction_backend.common.enums.UserRole;
 import com.auction.auction_backend.common.utils.AppUtils;
@@ -287,18 +288,61 @@ public class DataSeeder implements CommandLineRunner {
                                 bidder1, bidder2);
 
                 // 4. Completed Orders & Ratings (for testing history)
-                createCompletedOrderAndRating(seller, bidder1, phones, "iPhone 14 Pro Max (Đã bán)",
-                                new BigDecimal("20000000"), 1, "Máy đẹp, giao hàng nhanh!");
+                createCompletedOrderAndRating(seller, bidder1, phones, "iPhone 14 Pro Max 256GB Deep Purple",
+                                "Màn hình Dynamic Island, Camera 48MP siêu nét.",
+                                new BigDecimal("20000000"), 1, "Máy đẹp, giao hàng nhanh!",
+                                List.of("https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/t/_/t_m_20.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone_14_pro_max_512gb_-_2_1__1.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone_14_pro_max_512gb_-_6_1.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone_14_pro_max_512gb_-_3_1__1.png"));
 
-                createCompletedOrderAndRating(seller, bidder2, laptops, "MacBook Air M1 (Đã bán)",
-                                new BigDecimal("15000000"), 1, "Shop uy tín, đóng gói cẩn thận.");
+                createCompletedOrderAndRating(seller, bidder2, laptops, "MacBook Air M1 2020 Gray",
+                                "Chip M1 vẫn quá ngon trong tầm giá, pin trâu.",
+                                new BigDecimal("15000000"), 1, "Shop uy tín, đóng gói cẩn thận.",
+                                List.of("https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0000_macbook-air-gallery1-20201110_geo_us_5_1.jpg",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0003_macbook-air-gallery4-20201110_5_1.jpg",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0001_macbook-air-gallery2-20201110_5_1.jpg",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0002_dsc03721_2_2_1.jpg"));
 
-                createCompletedOrderAndRating(seller2, bidder1, accessories, "Chuột Logitech MX Master 3 (Đã bán)",
-                                new BigDecimal("2000000"), 1, "Hàng chính hãng, dùng rất sướng.");
+                createCompletedOrderAndRating(seller2, bidder1, accessories, "Chuột Logitech MX Master 3S",
+                                "Chuột công thái học tốt nhất cho dân văn phòng.",
+                                new BigDecimal("2000000"), 1, "Hàng chính hãng, dùng rất sướng.",
+                                List.of("https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s_5_.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s_2_.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s_1_.png"));
 
                 // Negative rating example
-                createCompletedOrderAndRating(seller, bidder2, menFashion, "Quần Jean Rách (Đã bán)",
-                                new BigDecimal("500000"), -1, "Hàng không giống mô tả, rất thất vọng.");
+                createCompletedOrderAndRating(seller, bidder2, menFashion, "Quần Jean Levi's 501 Original",
+                                "Quần jean ống đứng cổ điển, vải denim bền bỉ.",
+                                new BigDecimal("500000"), -1, "Hàng không giống mô tả, rất thất vọng.",
+                                List.of("https://shophangus.vn/wp-content/uploads/2023/06/size-30-.jpg",
+                                                "https://shophangus.vn/wp-content/uploads/2023/06/1-6.jpg",
+                                                "https://shophangus.vn/wp-content/uploads/2023/06/2-4.jpg",
+                                                "https://vanhoaduongpho.com/storage/news/nhin-lai-levis-501-mau-quan-jean-xanh-dau-tien-tren-the-gioi-1684827925.jpeg"));
+
+                // 5. Test Orders for Flow (Pending Payment & Paid)
+                // Case A: PENDING_PAYMENT -> Used to test Winner uploading proof
+                createTestOrderForFlow(seller, bidder1, electronics, "Sony PlayStation 5 Standard Edition",
+                                "Máy chơi game console thế hệ mới nhất của Sony. Chiến game 4K 120fps mượt mà.",
+                                new BigDecimal("12000000"),
+                                OrderStatus.PENDING_PAYMENT,
+                                List.of(
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/m/a/may-choi-game-sony-playstation-5-slim-1.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/m/a/may-choi-game-sony-playstation-5-slim-3.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/m/a/may-choi-game-sony-playstation-5-slim-2.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/m/a/may-choi-game-sony-playstation-5-slim-4.png"));
+
+                // Case B: PAID -> Used to test Seller uploading shipping proof
+                createTestOrderForFlow(seller, bidder2, electronics, "iPad Pro 11 inch 2022 M2 WiFi 128GB",
+                                "Chip M2 siêu mạnh, màn hình Liquid Retina 120Hz.",
+                                new BigDecimal("18000000"),
+                                OrderStatus.PAID,
+                                List.of(
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad_pro_11_128gb_-_1.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad_pro_11_128gb_-_3.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad_pro_11_128gb_-_2.png",
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad_pro_11_256gb_-_4.png"));
 
                 log.info("Database seeded successfully!");
         }
@@ -393,14 +437,14 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         private void createCompletedOrderAndRating(User seller, User winner, Category category, String productName,
-                        BigDecimal price, int score, String comment) {
+                        String description, BigDecimal price, int score, String comment, List<String> imageUrls) {
                 // 1. Create a "Sold" product (past auction)
                 Product product = Product.builder()
                                 .seller(seller)
                                 .category(category)
                                 .title(productName)
                                 .titleNormalized(AppUtils.removeAccent(productName))
-                                .description("Sản phẩm này đã bán.")
+                                .description(description)
                                 .startPrice(price.subtract(new BigDecimal("100000")))
                                 .currentPrice(price)
                                 .stepPrice(new BigDecimal("50000"))
@@ -412,6 +456,15 @@ public class DataSeeder implements CommandLineRunner {
                                 .autoExtendEnabled(true)
                                 .allowUnratedBidder(true)
                                 .build();
+
+                List<ProductImage> images = new ArrayList<>();
+                if (imageUrls != null) {
+                        for (String url : imageUrls) {
+                                images.add(ProductImage.builder().product(product).url(url).build());
+                        }
+                }
+                product.setImages(images);
+
                 product = productRepository.save(product);
 
                 // 2. Create Order
@@ -438,5 +491,57 @@ public class DataSeeder implements CommandLineRunner {
                                 .comment(comment)
                                 .build();
                 ratingRepository.save(rating);
+        }
+
+        private void createTestOrderForFlow(User seller, User winner, Category category, String productName,
+                        String description,
+                        BigDecimal price, com.auction.auction_backend.common.enums.OrderStatus status,
+                        List<String> imageUrls) {
+                // 1. Create Product (Recently sold)
+                Product product = Product.builder()
+                                .seller(seller)
+                                .category(category)
+                                .title(productName)
+                                .titleNormalized(AppUtils.removeAccent(productName))
+                                .description(description)
+                                .startPrice(price.subtract(new BigDecimal("500000")))
+                                .currentPrice(price)
+                                .stepPrice(new BigDecimal("100000"))
+                                .startAt(LocalDateTime.now().minusDays(2))
+                                .endAt(LocalDateTime.now().minusMinutes(10)) // Just ended
+                                .status(ProductStatus.SOLD)
+                                .currentWinner(winner)
+                                .autoExtendEnabled(true)
+                                .allowUnratedBidder(true)
+                                .build();
+
+                List<ProductImage> images = new ArrayList<>();
+                if (imageUrls != null) {
+                        for (String url : imageUrls) {
+                                images.add(ProductImage.builder().product(product).url(url).build());
+                        }
+                }
+                product.setImages(images);
+
+                product = productRepository.save(product);
+
+                // 2. Create Order
+                com.auction.auction_backend.modules.order.entity.Order order = com.auction.auction_backend.modules.order.entity.Order
+                                .builder()
+                                .product(product)
+                                .seller(seller)
+                                .winner(winner)
+                                .finalPrice(price)
+                                .status(status)
+                                .shippingAddress("456 Flow Test St, HCM")
+                                .build();
+
+                // If PAID state, simulate payment proof
+                if (status == com.auction.auction_backend.common.enums.OrderStatus.PAID) {
+                        order.setPaymentProofUrl("https://example.com/demo-payment-proof.jpg");
+                        order.setPaidAt(LocalDateTime.now().minusMinutes(5));
+                }
+
+                orderRepository.save(order);
         }
 }
