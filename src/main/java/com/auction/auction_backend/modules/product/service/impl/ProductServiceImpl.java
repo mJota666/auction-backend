@@ -42,6 +42,7 @@ public class ProductServiceImpl implements ProductService {
         private final UserRepository userRepository;
 
         @Override
+        @Transactional
         public void createProduct(CreateProductRequest request) {
                 UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication()
                                 .getPrincipal();
