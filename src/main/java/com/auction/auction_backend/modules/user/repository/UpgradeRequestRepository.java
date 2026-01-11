@@ -19,4 +19,6 @@ public interface UpgradeRequestRepository extends JpaRepository<UpgradeRequest, 
     boolean existsByUserIdAndStatus(Long userId, UpgradeRequestStatus status);
 
     Optional<UpgradeRequest> findByUserIdAndStatus(Long userId, UpgradeRequestStatus status);
+
+    void deleteByUserId(Long userId);
 }

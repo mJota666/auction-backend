@@ -17,4 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @org.springframework.data.jpa.repository.Query("SELECT SUM(o.finalPrice) FROM Order o WHERE o.status = 'PAID' OR o.status = 'DELIVERED'")
     java.math.BigDecimal calculateTotalRevenue();
+
+    boolean existsByWinnerId(Long winnerId);
+
+    boolean existsBySellerId(Long sellerId);
 }

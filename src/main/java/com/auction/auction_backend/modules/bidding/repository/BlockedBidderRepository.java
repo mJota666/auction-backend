@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BlockedBidderRepository extends JpaRepository<BlockedBidder, Long> {
     boolean existsByProductIdAndUserId(Long productId, Long userId);
+
+    void deleteByUserId(Long userId);
 }

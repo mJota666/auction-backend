@@ -18,4 +18,6 @@ public interface AutoBidRepository extends JpaRepository<AutoBidMax, Long> {
     Optional<AutoBidMax> findByProductAndBidder(Product product, User bidder);
 
     void deleteByProductAndBidder(Product product, User bidder);
+
+    void deleteByBidderId(Long bidderId);
 }

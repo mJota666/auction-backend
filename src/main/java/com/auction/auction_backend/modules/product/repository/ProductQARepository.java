@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductQARepository extends JpaRepository<ProductQA, Long> {
     Page<ProductQA> findByProductIdOrderByCreatedAtDesc(Long productId, Pageable pageable);
+
+    void deleteByAskerId(Long askerId);
 }

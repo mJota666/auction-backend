@@ -16,6 +16,9 @@ import com.auction.auction_backend.modules.user.repository.UserRepository;
 import com.auction.auction_backend.security.userdetail.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -189,8 +192,8 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
-    public org.springframework.data.domain.Page<com.auction.auction_backend.modules.bidding.dto.response.MyBidResponse> getMyBids(
-            Long userId, org.springframework.data.domain.Pageable pageable) {
+    public Page<com.auction.auction_backend.modules.bidding.dto.response.MyBidResponse> getMyBids(
+            Long userId, Pageable pageable) {
         return bidRepository.findByBidderId(userId, pageable)
                 .map(bid -> com.auction.auction_backend.modules.bidding.dto.response.MyBidResponse.builder()
                         .id(bid.getId())
@@ -203,8 +206,8 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
-    public org.springframework.data.domain.Page<com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse> getProductBids(
-            Long productId, org.springframework.data.domain.Pageable pageable) {
+    public Page<com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse> getProductBids(
+            Long productId, Pageable pageable) {
 
         return bidRepository.findByProductId(productId, pageable)
                 .map(bid -> com.auction.auction_backend.modules.bidding.dto.response.ProductBidResponse.builder()

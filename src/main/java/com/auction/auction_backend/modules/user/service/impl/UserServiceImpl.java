@@ -38,6 +38,13 @@ public class UserServiceImpl implements UserService {
     private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
     private final UpgradeRequestRepository upgradeRequestRepository;
+    private final com.auction.auction_backend.modules.bidding.repository.BidRepository bidRepository;
+    private final com.auction.auction_backend.modules.bidding.repository.AutoBidRepository autoBidRepository;
+    private final com.auction.auction_backend.modules.bidding.repository.BlockedBidderRepository blockedBidderRepository;
+    private final com.auction.auction_backend.modules.notification.repository.NotificationRepository notificationRepository;
+    private final com.auction.auction_backend.modules.order.repository.OrderRepository orderRepository;
+    private final com.auction.auction_backend.modules.user.repository.RatingRepository ratingRepository;
+    private final com.auction.auction_backend.modules.product.repository.ProductQARepository productQARepository;
     private final EmailService emailService;
 
     @Override
@@ -177,6 +184,37 @@ public class UserServiceImpl implements UserService {
         if (user.getRole() == UserRole.ADMIN) {
             throw new RuntimeException("Không thể xóa tài khoản Admin");
         }
+
+        // 1. Check orders (Blocking)
+        if (orderRepository.existsByWinnerId(userId) || orderRepository.existsBySellerId(userId)) {
+            throw new RuntimeException("Không thể xóa user đã có đơn hàng (mua hoặc bán).");
+        }
+
+        // Cascade delete related entities
+        upgradeRequestRepository.deleteByUserId(userId);
+        blockedBidderRepository.deleteByUserId(userId);
+        autoBidRepository.deleteByBidderId(userId);
+        bidRepository.deleteByBidderId(userId);
+        notificationRepository.deleteByUserId(userId);
+        ratingRepository.deleteByRaterId(userId);
+        ratingRepository.deleteByRatedUserId(userId);
+        productQARepository.deleteByAskerId(userId);
+
+        // 5. Unlink from won products
+        List<Product> wonProducts = productRepository.findByCurrentWinner(user);
+        for (Product p : wonProducts) {
+            p.setCurrentWinner(null);
+            productRepository.save(p);
+        }
+
+        // 6. Check seller products
+        if (user.getRole() == UserRole.SELLER) {
+            List<Product> sellingProducts = productRepository.findBySeller(user);
+            if (!sellingProducts.isEmpty()) {
+                throw new RuntimeException("Không thể xóa user đang có sản phẩm. Vui lòng xóa sản phẩm trước.");
+            }
+        }
+
         userRepository.delete(user);
     }
 

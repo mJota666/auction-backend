@@ -39,4 +39,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     long countByStatus(ProductStatus status);
 
     long countByCategoryId(Long categoryId);
+
+    List<Product> findByCurrentWinner(com.auction.auction_backend.modules.user.entity.User currentWinner);
+
+    List<Product> findBySeller(com.auction.auction_backend.modules.user.entity.User seller);
 }
