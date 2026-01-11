@@ -12,21 +12,25 @@ import java.time.LocalDateTime;
 public class BidHistoryResponse {
     private Long id;
     private String bidderName;
+    private Long bidderId;
     private BigDecimal amount;
     private LocalDateTime time;
     private boolean isAutoBid;
 
-    public static BidHistoryResponse fromEntity(Bid bid) {
+    public static BidHistoryResponse fromEntity(Bid bid, boolean isSeller) {
         return BidHistoryResponse.builder()
                 .id(bid.getId())
-                .bidderName(maskName(bid.getBidder().getFullName()))
+                .bidderName(isSeller ? bid.getBidder().getFullName() : maskName(bid.getBidder().getFullName()))
+                .bidderId(isSeller ? bid.getBidder().getId() : null)
                 .amount(bid.getBidAmount())
                 .time(bid.getCreatedAt())
                 .isAutoBid("AUTO".equals(bid.getBidType()))
                 .build();
     }
+
     private static String maskName(String fullName) {
-        if (fullName == null || fullName.isEmpty()) return "****Unknown";
+        if (fullName == null || fullName.isEmpty())
+            return "****Unknown";
 
         String[] parts = fullName.split(" ");
         if (parts.length == 1) {
