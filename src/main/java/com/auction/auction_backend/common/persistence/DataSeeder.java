@@ -13,6 +13,7 @@ import com.auction.auction_backend.modules.product.entity.Product;
 import com.auction.auction_backend.modules.product.entity.ProductImage;
 import com.auction.auction_backend.modules.product.repository.CategoryRepository;
 import com.auction.auction_backend.modules.product.repository.ProductRepository;
+import com.auction.auction_backend.modules.user.entity.Rating;
 import com.auction.auction_backend.modules.user.entity.User;
 import com.auction.auction_backend.modules.user.repository.RatingRepository;
 import com.auction.auction_backend.modules.user.repository.UserRepository;
@@ -26,9 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -45,22 +44,33 @@ public class DataSeeder implements CommandLineRunner {
 
         @Override
         @Transactional
-        public void run(String... args) throws Exception {
-                if (userRepository.count() > 0) {
-                        log.info("Database already seeded. Skipping...");
-                        return;
+        public void run(String... args) {
+                // ==== 0) OPTIONAL: FORCE RESEED ====
+                // Run with: -Dapp.seed.force=true
+                boolean force = Boolean.parseBoolean(System.getProperty("app.seed.force", "false"));
+                if (force) {
+                        log.warn("FORCE reseed enabled -> clearing database...");
+                        clearDatabase();
+                } else {
+                        // ==== 0.1) SAFER "already seeded" check ====
+                        // Tránh case DB có mỗi user => seeder skip và ratings không được tạo
+                        if (userRepository.existsByEmail("admin@gmail.com")) {
+                                log.info("Database already seeded (admin@gmail.com exists). Skipping...");
+                                return;
+                        }
                 }
 
                 log.info("Seeding database...");
 
-                // 1. Users
+                // 1. Users (NOTE: ratingPositive/Negative = 0, sẽ tính lại từ bảng Rating ở
+                // cuối)
                 User admin = createUser("Admin User", "admin@gmail.com", UserRole.ADMIN);
                 User seller = createUser("Seller User", "seller@gmail.com", UserRole.SELLER);
                 User seller2 = createUser("Tech Shop Official", "techshop@gmail.com", UserRole.SELLER);
                 User bidder1 = createUser("Nguyen Van BidderOne", "bidder1@gmail.com", UserRole.BIDDER);
                 User bidder2 = createUser("Tran Thi BidderTwo", "bidder2@gmail.com", UserRole.BIDDER);
 
-                // 2. Categories (5 parent categories)
+                // 2. Categories
                 Category electronics = createCategory("Điện tử", null);
                 Category phones = createCategory("Điện thoại", electronics.getId());
                 Category laptops = createCategory("Laptop", electronics.getId());
@@ -79,8 +89,7 @@ public class DataSeeder implements CommandLineRunner {
 
                 Category books = createCategory("Sách & Văn phòng phẩm", null);
 
-                // 3. Products (20+ items)
-
+                // 3. Products (giữ như bạn seed)
                 // --- Electronics ---
                 createProduct(seller, phones, "iPhone 15 Pro Max Titanium 256GB",
                                 "<p><strong>iPhone 15 Pro Max</strong> thiết kế titan chuẩn hàng không vũ trụ.</p><ul><li>Chip A17 Pro mạnh mẽ.</li><li>Camera 48MP chuyên nghiệp.</li><li>Nút Action mới.</li></ul>",
@@ -287,11 +296,12 @@ public class DataSeeder implements CommandLineRunner {
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/t/e/text_ng_n_6__5_119.png"),
                                 bidder1, bidder2);
 
-                // 4. Completed Orders & Ratings (for testing history)
+                // 4. Completed Orders & Ratings (seed ratings thật)
                 createCompletedOrderAndRating(seller, bidder1, phones, "iPhone 14 Pro Max 256GB Deep Purple",
                                 "Màn hình Dynamic Island, Camera 48MP siêu nét.",
                                 new BigDecimal("20000000"), 1, "Máy đẹp, giao hàng nhanh!",
-                                List.of("https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/t/_/t_m_20.png",
+                                List.of(
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/t/_/t_m_20.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone_14_pro_max_512gb_-_2_1__1.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone_14_pro_max_512gb_-_6_1.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone_14_pro_max_512gb_-_3_1__1.png"));
@@ -299,7 +309,8 @@ public class DataSeeder implements CommandLineRunner {
                 createCompletedOrderAndRating(seller, bidder2, laptops, "MacBook Air M1 2020 Gray",
                                 "Chip M1 vẫn quá ngon trong tầm giá, pin trâu.",
                                 new BigDecimal("15000000"), 1, "Shop uy tín, đóng gói cẩn thận.",
-                                List.of("https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0000_macbook-air-gallery1-20201110_geo_us_5_1.jpg",
+                                List.of(
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0000_macbook-air-gallery1-20201110_geo_us_5_1.jpg",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0003_macbook-air-gallery4-20201110_5_1.jpg",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0001_macbook-air-gallery2-20201110_5_1.jpg",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/_/0/_0002_dsc03721_2_2_1.jpg"));
@@ -307,7 +318,8 @@ public class DataSeeder implements CommandLineRunner {
                 createCompletedOrderAndRating(seller2, bidder1, accessories, "Chuột Logitech MX Master 3S",
                                 "Chuột công thái học tốt nhất cho dân văn phòng.",
                                 new BigDecimal("2000000"), 1, "Hàng chính hãng, dùng rất sướng.",
-                                List.of("https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s.png",
+                                List.of(
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s_5_.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s_2_.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/c/h/chuot-khong-day-bluetooth-logitech-mx-master-3s_1_.png"));
@@ -316,13 +328,13 @@ public class DataSeeder implements CommandLineRunner {
                 createCompletedOrderAndRating(seller, bidder2, menFashion, "Quần Jean Levi's 501 Original",
                                 "Quần jean ống đứng cổ điển, vải denim bền bỉ.",
                                 new BigDecimal("500000"), -1, "Hàng không giống mô tả, rất thất vọng.",
-                                List.of("https://shophangus.vn/wp-content/uploads/2023/06/size-30-.jpg",
+                                List.of(
+                                                "https://shophangus.vn/wp-content/uploads/2023/06/size-30-.jpg",
                                                 "https://shophangus.vn/wp-content/uploads/2023/06/1-6.jpg",
                                                 "https://shophangus.vn/wp-content/uploads/2023/06/2-4.jpg",
                                                 "https://vanhoaduongpho.com/storage/news/nhin-lai-levis-501-mau-quan-jean-xanh-dau-tien-tren-the-gioi-1684827925.jpeg"));
 
-                // 5. Test Orders for Flow (Pending Payment & Paid)
-                // Case A: PENDING_PAYMENT -> Used to test Winner uploading proof
+                // 5. Test Orders for Flow
                 createTestOrderForFlow(seller, bidder1, electronics, "Sony PlayStation 5 Standard Edition",
                                 "Máy chơi game console thế hệ mới nhất của Sony. Chiến game 4K 120fps mượt mà.",
                                 new BigDecimal("12000000"),
@@ -333,7 +345,6 @@ public class DataSeeder implements CommandLineRunner {
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/m/a/may-choi-game-sony-playstation-5-slim-2.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/m/a/may-choi-game-sony-playstation-5-slim-4.png"));
 
-                // Case B: PAID -> Used to test Seller uploading shipping proof
                 createTestOrderForFlow(seller, bidder2, electronics, "iPad Pro 11 inch 2022 M2 WiFi 128GB",
                                 "Chip M2 siêu mạnh, màn hình Liquid Retina 120Hz.",
                                 new BigDecimal("18000000"),
@@ -344,7 +355,36 @@ public class DataSeeder implements CommandLineRunner {
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad_pro_11_128gb_-_2.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad_pro_11_256gb_-_4.png"));
 
+                // ==== 6) CRITICAL: Recalculate rating counters so User fields match Rating
+                // table ====
+                recalculateUserRatingCounters();
+
                 log.info("Database seeded successfully!");
+        }
+
+        private void clearDatabase() {
+                // Thứ tự xoá để tránh FK constraint (rating -> order -> product -> category ->
+                // user)
+                safeDeleteAll(ratingRepository);
+                safeDeleteAll(orderRepository);
+                safeDeleteAll(bidRepository);
+                safeDeleteAll(productRepository);
+                safeDeleteAll(categoryRepository);
+                safeDeleteAll(userRepository);
+        }
+
+        private void safeDeleteAll(Object repo) {
+                try {
+                        // deleteAllInBatch nếu repo là JpaRepository
+                        repo.getClass().getMethod("deleteAllInBatch").invoke(repo);
+                } catch (Exception ignored) {
+                        try {
+                                repo.getClass().getMethod("deleteAll").invoke(repo);
+                        } catch (Exception e) {
+                                throw new RuntimeException(
+                                                "Cannot delete from repository: " + repo.getClass().getName(), e);
+                        }
+                }
         }
 
         private User createUser(String name, String email, UserRole role) {
@@ -356,7 +396,8 @@ public class DataSeeder implements CommandLineRunner {
                                 .address("TP. Hồ Chí Minh")
                                 .dob(LocalDate.of(1995, 1, 1))
                                 .active(true)
-                                .ratingPositive(10)
+                                // IMPORTANT: seed = 0, sẽ sync theo Rating ở cuối
+                                .ratingPositive(0)
                                 .ratingNegative(0)
                                 .build());
         }
@@ -368,8 +409,10 @@ public class DataSeeder implements CommandLineRunner {
                                 .build());
         }
 
-        private void createProduct(User seller, Category category, String title, String desc, BigDecimal startPrice,
-                        BigDecimal buyNowPrice, List<String> imageUrls, User... potentialBidders) {
+        private void createProduct(User seller, Category category, String title, String desc,
+                        BigDecimal startPrice, BigDecimal buyNowPrice,
+                        List<String> imageUrls, User... potentialBidders) {
+
                 Product product = Product.builder()
                                 .seller(seller)
                                 .category(category)
@@ -380,10 +423,8 @@ public class DataSeeder implements CommandLineRunner {
                                 .currentPrice(startPrice)
                                 .stepPrice(new BigDecimal("100000"))
                                 .buyNowPrice(buyNowPrice)
-                                .startAt(LocalDateTime.now().minusHours(1)) // Started 1 hour ago
-                                .endAt(LocalDateTime.now().plusMinutes(300 + new Random().nextInt(4300))) // Ends in 300
-                                // mins to ~3
-                                // days
+                                .startAt(LocalDateTime.now().minusHours(1))
+                                .endAt(LocalDateTime.now().plusMinutes(300 + new Random().nextInt(4300)))
                                 .status(ProductStatus.ACTIVE)
                                 .autoExtendEnabled(true)
                                 .allowUnratedBidder(true)
@@ -398,11 +439,9 @@ public class DataSeeder implements CommandLineRunner {
                 product.setImages(images);
 
                 product = productRepository.save(product);
+
                 createRandomBids(product, potentialBidders);
-                // Save product again if currentPrice was updated during bid creation (depends
-                // on implementation)
-                // However, we are saving bids directly. The Product entity field currentPrice
-                // should be updated.
+
                 productRepository.save(product);
         }
 
@@ -413,12 +452,10 @@ public class DataSeeder implements CommandLineRunner {
 
                 for (int i = 0; i < bidCount; i++) {
                         User bidder = bidders[random.nextInt(bidders.length)];
-                        // Increase bid by 1 to 5 steps
                         int steps = 1 + random.nextInt(5);
                         BigDecimal increase = product.getStepPrice().multiply(new BigDecimal(steps));
                         currentBidAmount = currentBidAmount.add(increase);
 
-                        // Ensure not exceeding buyNowPrice if it exists
                         if (product.getBuyNowPrice() != null
                                         && currentBidAmount.compareTo(product.getBuyNowPrice()) >= 0) {
                                 break;
@@ -428,7 +465,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .product(product)
                                         .bidder(bidder)
                                         .bidAmount(currentBidAmount)
-                                        .bidType(BidType.MANUAL) // Using MANUAL for simplicity
+                                        .bidType(BidType.MANUAL)
                                         .build();
 
                         bidRepository.save(bid);
@@ -437,8 +474,9 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         private void createCompletedOrderAndRating(User seller, User winner, Category category, String productName,
-                        String description, BigDecimal price, int score, String comment, List<String> imageUrls) {
-                // 1. Create a "Sold" product (past auction)
+                        String description, BigDecimal price,
+                        int score, String comment, List<String> imageUrls) {
+
                 Product product = Product.builder()
                                 .seller(seller)
                                 .category(category)
@@ -450,65 +488,7 @@ public class DataSeeder implements CommandLineRunner {
                                 .stepPrice(new BigDecimal("50000"))
                                 .buyNowPrice(price.add(new BigDecimal("1000000")))
                                 .startAt(LocalDateTime.now().minusDays(10))
-                                .endAt(LocalDateTime.now().minusDays(5)) // Ended 5 days ago
-                                .status(ProductStatus.SOLD)
-                                .currentWinner(winner) // Winner is set
-                                .autoExtendEnabled(true)
-                                .allowUnratedBidder(true)
-                                .build();
-
-                List<ProductImage> images = new ArrayList<>();
-                if (imageUrls != null) {
-                        for (String url : imageUrls) {
-                                images.add(ProductImage.builder().product(product).url(url).build());
-                        }
-                }
-                product.setImages(images);
-
-                product = productRepository.save(product);
-
-                // 2. Create Order
-                com.auction.auction_backend.modules.order.entity.Order order = com.auction.auction_backend.modules.order.entity.Order
-                                .builder()
-                                .product(product)
-                                .seller(seller)
-                                .winner(winner)
-                                .finalPrice(price)
-                                .status(com.auction.auction_backend.common.enums.OrderStatus.DELIVERED) // Finished
-                                                                                                        // order
-                                .paymentMethod(com.auction.auction_backend.common.enums.PaymentMethod.COD)
-                                .shippingAddress("123 Seed Street, HCM")
-                                .build();
-                order = orderRepository.save(order);
-
-                // 3. Create Rating (Winner rates Seller)
-                com.auction.auction_backend.modules.user.entity.Rating rating = com.auction.auction_backend.modules.user.entity.Rating
-                                .builder()
-                                .order(order)
-                                .rater(winner)
-                                .ratedUser(seller)
-                                .score(score)
-                                .comment(comment)
-                                .build();
-                ratingRepository.save(rating);
-        }
-
-        private void createTestOrderForFlow(User seller, User winner, Category category, String productName,
-                        String description,
-                        BigDecimal price, com.auction.auction_backend.common.enums.OrderStatus status,
-                        List<String> imageUrls) {
-                // 1. Create Product (Recently sold)
-                Product product = Product.builder()
-                                .seller(seller)
-                                .category(category)
-                                .title(productName)
-                                .titleNormalized(AppUtils.removeAccent(productName))
-                                .description(description)
-                                .startPrice(price.subtract(new BigDecimal("500000")))
-                                .currentPrice(price)
-                                .stepPrice(new BigDecimal("100000"))
-                                .startAt(LocalDateTime.now().minusDays(2))
-                                .endAt(LocalDateTime.now().minusMinutes(10)) // Just ended
+                                .endAt(LocalDateTime.now().minusDays(5))
                                 .status(ProductStatus.SOLD)
                                 .currentWinner(winner)
                                 .autoExtendEnabled(true)
@@ -525,7 +505,59 @@ public class DataSeeder implements CommandLineRunner {
 
                 product = productRepository.save(product);
 
-                // 2. Create Order
+                com.auction.auction_backend.modules.order.entity.Order order = com.auction.auction_backend.modules.order.entity.Order
+                                .builder()
+                                .product(product)
+                                .seller(seller)
+                                .winner(winner)
+                                .finalPrice(price)
+                                .status(OrderStatus.DELIVERED)
+                                .paymentMethod(com.auction.auction_backend.common.enums.PaymentMethod.COD)
+                                .shippingAddress("123 Seed Street, HCM")
+                                .build();
+                order = orderRepository.save(order);
+
+                Rating rating = Rating.builder()
+                                .order(order)
+                                .rater(winner)
+                                .ratedUser(seller)
+                                .score(score) // +1 / -1 (giữ theo domain hiện tại của bạn)
+                                .comment(comment)
+                                .build();
+                ratingRepository.save(rating);
+        }
+
+        private void createTestOrderForFlow(User seller, User winner, Category category, String productName,
+                        String description, BigDecimal price, OrderStatus status,
+                        List<String> imageUrls) {
+
+                Product product = Product.builder()
+                                .seller(seller)
+                                .category(category)
+                                .title(productName)
+                                .titleNormalized(AppUtils.removeAccent(productName))
+                                .description(description)
+                                .startPrice(price.subtract(new BigDecimal("500000")))
+                                .currentPrice(price)
+                                .stepPrice(new BigDecimal("100000"))
+                                .startAt(LocalDateTime.now().minusDays(2))
+                                .endAt(LocalDateTime.now().minusMinutes(10))
+                                .status(ProductStatus.SOLD)
+                                .currentWinner(winner)
+                                .autoExtendEnabled(true)
+                                .allowUnratedBidder(true)
+                                .build();
+
+                List<ProductImage> images = new ArrayList<>();
+                if (imageUrls != null) {
+                        for (String url : imageUrls) {
+                                images.add(ProductImage.builder().product(product).url(url).build());
+                        }
+                }
+                product.setImages(images);
+
+                product = productRepository.save(product);
+
                 com.auction.auction_backend.modules.order.entity.Order order = com.auction.auction_backend.modules.order.entity.Order
                                 .builder()
                                 .product(product)
@@ -536,12 +568,46 @@ public class DataSeeder implements CommandLineRunner {
                                 .shippingAddress("456 Flow Test St, HCM")
                                 .build();
 
-                // If PAID state, simulate payment proof
-                if (status == com.auction.auction_backend.common.enums.OrderStatus.PAID) {
+                if (status == OrderStatus.PAID) {
                         order.setPaymentProofUrl("https://example.com/demo-payment-proof.jpg");
                         order.setPaidAt(LocalDateTime.now().minusMinutes(5));
                 }
 
                 orderRepository.save(order);
+        }
+
+        /**
+         * Recalculate ratingPositive/ratingNegative from Rating table
+         * => đảm bảo dữ liệu User luôn khớp Rating.
+         */
+        private void recalculateUserRatingCounters() {
+                List<User> users = userRepository.findAll();
+                List<Rating> ratings = ratingRepository.findAll();
+
+                Map<Long, int[]> counterMap = new HashMap<>();
+                for (Rating r : ratings) {
+                        if (r.getRatedUser() == null || r.getRatedUser().getId() == null)
+                                continue;
+                        long userId = r.getRatedUser().getId();
+                        int[] counters = counterMap.computeIfAbsent(userId, k -> new int[] { 0, 0 });
+                        if (r.getScore() > 0)
+                                counters[0]++; // positive
+                        else if (r.getScore() < 0)
+                                counters[1]++; // negative
+                }
+
+                for (User u : users) {
+                        int[] counters = counterMap.getOrDefault(u.getId(), new int[] { 0, 0 });
+                        u.setRatingPositive(counters[0]);
+                        u.setRatingNegative(counters[1]);
+                }
+
+                userRepository.saveAll(users);
+
+                log.info("Recalculated user rating counters from Rating table.");
+                for (User u : users) {
+                        log.info("User {} ({}) -> +{} / -{}",
+                                        u.getFullName(), u.getEmail(), u.getRatingPositive(), u.getRatingNegative());
+                }
         }
 }
