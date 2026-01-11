@@ -44,6 +44,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public com.auction.auction_backend.modules.user.dto.response.PublicUserResponse getPublicProfile(Long userId) {
+        User user = getUserById(userId);
+        return com.auction.auction_backend.modules.user.dto.response.PublicUserResponse.fromEntity(user);
+    }
+
+    @Override
     @Transactional
     public void updateProfile(Long userId, UpdateProfileRequest request) {
         User user = getUserById(userId);

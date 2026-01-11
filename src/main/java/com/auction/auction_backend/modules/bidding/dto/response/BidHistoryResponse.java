@@ -16,15 +16,20 @@ public class BidHistoryResponse {
     private BigDecimal amount;
     private LocalDateTime time;
     private boolean isAutoBid;
+    private int ratingPositive;
+    private int ratingNegative;
 
     public static BidHistoryResponse fromEntity(Bid bid, boolean isSeller) {
         return BidHistoryResponse.builder()
                 .id(bid.getId())
-                .bidderName(isSeller ? bid.getBidder().getFullName() : maskName(bid.getBidder().getFullName()))
+                .bidderName(isSeller ? bid.getBidder().getFullName()
+                        : com.auction.auction_backend.common.utils.AppUtils.maskName(bid.getBidder().getFullName()))
                 .bidderId(isSeller ? bid.getBidder().getId() : null)
                 .amount(bid.getBidAmount())
                 .time(bid.getCreatedAt())
                 .isAutoBid("AUTO".equals(bid.getBidType()))
+                .ratingPositive(bid.getBidder().getRatingPositive())
+                .ratingNegative(bid.getBidder().getRatingNegative())
                 .build();
     }
 

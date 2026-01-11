@@ -29,6 +29,12 @@ public class UserController {
         return ResponseEntity.ok(BaseResponse.success(userService.getProfile(currentUser.getId())));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<BaseResponse<com.auction.auction_backend.modules.user.dto.response.PublicUserResponse>> getPublicProfile(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(BaseResponse.success(userService.getPublicProfile(id)));
+    }
+
     @PutMapping("/me")
     public ResponseEntity<BaseResponse<String>> updateProfile(
             @AuthenticationPrincipal UserPrincipal currentUser,
@@ -95,5 +101,12 @@ public class UserController {
             @AuthenticationPrincipal UserPrincipal currentUser,
             Pageable pageable) {
         return ResponseEntity.ok(BaseResponse.success(ratingService.getRatingsReceived(currentUser.getId(), pageable)));
+    }
+
+    @GetMapping("/{id}/ratings")
+    public ResponseEntity<BaseResponse<Page<com.auction.auction_backend.modules.user.dto.response.RatingResponse>>> getPublicUserRatings(
+            @PathVariable Long id,
+            Pageable pageable) {
+        return ResponseEntity.ok(BaseResponse.success(ratingService.getRatingsReceived(id, pageable)));
     }
 }

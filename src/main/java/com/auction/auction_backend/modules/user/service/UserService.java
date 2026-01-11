@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 public interface UserService {
     User getProfile(Long userId);
 
+    com.auction.auction_backend.modules.user.dto.response.PublicUserResponse getPublicProfile(Long userId);
+
     void updateProfile(Long userId, UpdateProfileRequest request);
 
     void changePassword(Long userId, ChangePasswordRequest request);

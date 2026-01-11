@@ -52,6 +52,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/bids/product/**").permitAll()
                         .requestMatchers("/api/v1/streams/**").permitAll()
+                        .requestMatchers("/api/v1/users/me", "/api/v1/users/favorites", "/api/v1/users/upgrade-request")
+                        .authenticated() // Secure sensitive user endpoints first
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}").permitAll() // Allow public access to
+                                                                                           // user profile by ID
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}/ratings").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated());
 
