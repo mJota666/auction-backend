@@ -47,7 +47,7 @@ public class BidServiceImpl implements BidService {
         User bidder = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        Product product = productRepository.findById(request.getProductId())
+        Product product = productRepository.findByIdWithLock(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         validateBid(product, bidder, request.getAmount());
@@ -191,18 +191,8 @@ public class BidServiceImpl implements BidService {
                         .id(bid.getId())
                         .amount(bid.getBidAmount())
                         .time(bid.getCreatedAt())
-                        .bidderName(maskBidderName(bid.getBidder().getFullName()))
+                        .bidderName(com.auction.auction_backend.common.utils.AppUtils
+                                .maskName(bid.getBidder().getFullName()))
                         .build());
-    }
-
-    private String maskBidderName(String fullName) {
-        if (fullName == null || fullName.isBlank()) {
-            return "****User";
-        }
-        String[] parts = fullName.trim().split("\\s+");
-        if (parts.length > 0) {
-            return "****" + parts[parts.length - 1];
-        }
-        return "****User";
     }
 }

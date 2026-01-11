@@ -47,6 +47,7 @@ public class ProductDetailResponse extends ProductResponse {
                 .allowUnratedBidder(product.isAllowUnratedBidder())
                 .categoryName(categoryName)
                 .sellerName(sellerName)
+                .sellerId(product.getSeller() != null ? product.getSeller().getId() : null)
                 .currentWinnerName(winnerName)
                 .status(product.getStatus())
                 .thumbnailUrl(thumb)

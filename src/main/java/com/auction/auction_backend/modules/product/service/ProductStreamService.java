@@ -54,9 +54,12 @@ public class ProductStreamService {
         emitters.forEach(emitter -> {
             try {
                 emitter.send(SseEmitter.event().name("product-update").data(event));
-            } catch (IOException e) {
-                log.warn("Failed to send SSE update, removing client.");
+            } catch (Exception e) {
+                // Catching generic Exception to handle ClientAbortException (which might be
+                // wrapped) and others
+                log.debug("Unsubscribe client due to error: {}", e.getMessage());
                 emitter.complete();
+                productEmitters.get(productId).remove(emitter); // Ensure removal
             }
         });
     }

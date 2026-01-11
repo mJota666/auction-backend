@@ -33,6 +33,7 @@ public class ProductResponse {
     private ProductStatus status;
 
     private String sellerName;
+    private Long sellerId;
     private String currentWinnerName;
     private int bidCount;
 
@@ -44,11 +45,13 @@ public class ProductResponse {
 
         String winnerName = null;
         if (product.getCurrentWinner() != null) {
-            // Mask tên: "Nguyễn Văn A" -> "****n Văn A" hoặc logic tùy ý
-            winnerName = product.getCurrentWinner().getFullName();
+            // Mask tên
+            winnerName = com.auction.auction_backend.common.utils.AppUtils
+                    .maskName(product.getCurrentWinner().getFullName());
         }
 
         String sellerName = (product.getSeller() != null) ? product.getSeller().getFullName() : "Unknown";
+        Long sellerId = (product.getSeller() != null) ? product.getSeller().getId() : null;
 
         int totalBids = (product.getBids() != null) ? product.getBids().size() : 0;
 
@@ -69,6 +72,7 @@ public class ProductResponse {
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.getStatus())
                 .sellerName(sellerName)
+                .sellerId(sellerId)
                 .currentWinnerName(winnerName)
                 .bidCount(totalBids)
                 .build();

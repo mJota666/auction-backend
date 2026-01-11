@@ -154,17 +154,6 @@ public class AutoBidServiceImpl implements AutoBidService {
         productStreamService.broadcastProductUpdate(
                 product.getId(),
                 newPrice,
-                maskBidderName(newWinner.getFullName()));
-    }
-
-    private String maskBidderName(String fullName) {
-        if (fullName == null || fullName.isBlank()) {
-            return "****User";
-        }
-        String[] parts = fullName.trim().split("\\s+");
-        if (parts.length > 0) {
-            return "****" + parts[parts.length - 1];
-        }
-        return "****User";
+                com.auction.auction_backend.common.utils.AppUtils.maskName(newWinner.getFullName()));
     }
 }

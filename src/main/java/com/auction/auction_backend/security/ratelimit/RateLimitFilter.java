@@ -63,14 +63,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private Bucket createNewBucket(String key) {
         if (key.startsWith("user:")) {
-            // Authenticated users: 60 requests per minute
+            // Authenticated users: 120 requests per minute (~2 req/sec)
             return Bucket.builder()
-                    .addLimit(Bandwidth.classic(60, Refill.greedy(60, Duration.ofMinutes(1))))
+                    .addLimit(Bandwidth.classic(120, Refill.greedy(120, Duration.ofMinutes(1))))
                     .build();
         } else {
-            // Guest/IP: 20 requests per minute
+            // Guest/IP: 50 requests per minute
             return Bucket.builder()
-                    .addLimit(Bandwidth.classic(20, Refill.greedy(20, Duration.ofMinutes(1))))
+                    .addLimit(Bandwidth.classic(50, Refill.greedy(50, Duration.ofMinutes(1))))
                     .build();
         }
     }
