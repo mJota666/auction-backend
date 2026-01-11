@@ -108,11 +108,31 @@ public class BidServiceImpl implements BidService {
                 .build();
         blockedBidderRepository.save(blocked);
 
-        // Remove existing autobids
+        // 1. Remove existing auto bids configuration
         autoBidRepository.deleteByProductAndBidder(product, bidder);
+        // 2. Remove existing placed bids history
+        bidRepository.deleteByProductAndBidder(product, bidder);
+        bidRepository.flush();
 
-        // Retrigger calculation
-        autoBidService.triggerAutoBid(product);
+        // 3. If blocked user was the current winner, clear winner temporarily
+        if (product.getCurrentWinner() != null && product.getCurrentWinner().getId().equals(userId)) {
+            product.setCurrentWinner(null);
+            productRepository.save(product);
+        }
+
+        // 4. Check if there are any remaining bidders
+        java.util.List<com.auction.auction_backend.modules.bidding.entity.AutoBidMax> remainingBidders = autoBidRepository
+                .findSortedBids(productId);
+
+        if (remainingBidders.isEmpty()) {
+            // No one left, reset to start price
+            product.setCurrentPrice(product.getStartPrice());
+            product.setCurrentWinner(null);
+            productRepository.save(product);
+        } else {
+            // Retrigger calculation to pick next winner (fallback)
+            autoBidService.triggerAutoBid(product);
+        }
 
         // Notify blocked user
         try {

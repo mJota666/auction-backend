@@ -10,4 +10,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     Page<Bid> findByBidderId(Long bidderId, Pageable pageable);
 
     Page<Bid> findByProductId(Long productId, Pageable pageable);
+
+    void deleteByProductAndBidder(com.auction.auction_backend.modules.product.entity.Product product,
+            com.auction.auction_backend.modules.user.entity.User bidder);
 }
