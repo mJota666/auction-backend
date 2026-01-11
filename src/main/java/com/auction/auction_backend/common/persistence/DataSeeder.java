@@ -131,9 +131,9 @@ public class DataSeeder implements CommandLineRunner {
                                 "<p>Bàn phím cơ không dây custom, LED RGB.</p>",
                                 new BigDecimal("1500000"), new BigDecimal("2500000"),
                                 List.of(
-                                                "https://giaysneakerhcm.com/wp-content/uploads/2025/08/Ao-Thun-Gucci-Cotton-Jersey-Jacquard-Polo-Shirt-Mau-Xanh-Navy-1.jpg",
                                                 "https://owlgaming.vn/wp-content/uploads/2023/02/1-3.jpg",
                                                 "https://owlgaming.vn/wp-content/uploads/2023/02/2-3.jpg",
+                                                "https://owlgaming.vn/wp-content/uploads/2023/02/4-3.jpg",
                                                 "https://owlgaming.vn/wp-content/uploads/2023/02/6-3.jpg"),
                                 bidder1, bidder2);
 
@@ -319,7 +319,9 @@ public class DataSeeder implements CommandLineRunner {
                                 .stepPrice(new BigDecimal("100000"))
                                 .buyNowPrice(buyNowPrice)
                                 .startAt(LocalDateTime.now().minusHours(1)) // Started 1 hour ago
-                                .endAt(LocalDateTime.now().plusHours(24)) // Ends in 24 hours
+                                .endAt(LocalDateTime.now().plusMinutes(300 + new Random().nextInt(4300))) // Ends in 300
+                                                                                                          // mins to ~3
+                                                                                                          // days
                                 .status(ProductStatus.ACTIVE)
                                 .autoExtendEnabled(true)
                                 .allowUnratedBidder(true)
