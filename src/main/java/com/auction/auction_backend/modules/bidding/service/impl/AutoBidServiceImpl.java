@@ -75,6 +75,20 @@ public class AutoBidServiceImpl implements AutoBidService {
                 top1.getBidder().getEmail(), top1.getMaxAmount(),
                 top2.getBidder().getEmail(), top2.getMaxAmount());
 
+        // Ensure Top2 (Challenger) has a bid record at their max amount
+        if (!bidRepository.existsByProductAndBidderAndMaxAmount(product, top2.getBidder(), top2.getMaxAmount())) {
+            Bid challengerBid = Bid.builder()
+                    .product(product)
+                    .bidder(top2.getBidder())
+                    .bidAmount(top2.getMaxAmount()) // Losing bid amount
+                    .maxAmount(top2.getMaxAmount())
+                    .bidType(com.auction.auction_backend.common.enums.BidType.AUTO)
+                    .build();
+            bidRepository.save(challengerBid);
+            log.info("[DEBUG_BID] Recorded losing bid for challenger: {} at {}", top2.getBidder().getEmail(),
+                    top2.getMaxAmount());
+        }
+
         BigDecimal newPrice = top2.getMaxAmount().add(product.getStepPrice());
         log.info("[DEBUG_BID] Calculated New Price (Top2 + Step): {}", newPrice);
 

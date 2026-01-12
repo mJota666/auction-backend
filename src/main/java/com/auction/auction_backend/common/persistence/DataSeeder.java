@@ -105,8 +105,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/f/r/frame_100_1_2__2_2.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad-pro-m4-11-inch_3_.png",
                                                 "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad-pro-m4-11-inch_3_.png",
-                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad-pro-m4-11-inch_6_.png"),
-                                bidder1, bidder2);
+                                                "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/ipad-pro-m4-11-inch_6_.png"));
 
                 createProduct(seller, phones, "iPhone 15 Pro Max Titanium 256GB",
                                 "<p><strong>iPhone 15 Pro Max</strong> thiết kế titan chuẩn hàng không vũ trụ.</p><ul><li>Chip A17 Pro mạnh mẽ.</li><li>Camera 48MP chuyên nghiệp.</li><li>Nút Action mới.</li></ul>",
@@ -457,8 +456,9 @@ public class DataSeeder implements CommandLineRunner {
 
                 product = productRepository.save(product);
 
-                createRandomBids(product, potentialBidders);
-
+                if (potentialBidders != null && potentialBidders.length > 0) {
+                        createRandomBids(product, potentialBidders);
+                }
                 productRepository.save(product);
         }
 

@@ -15,4 +15,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
             com.auction.auction_backend.modules.user.entity.User bidder);
 
     void deleteByBidderId(Long bidderId);
+
+    boolean existsByProductAndBidderAndMaxAmount(com.auction.auction_backend.modules.product.entity.Product product,
+            com.auction.auction_backend.modules.user.entity.User bidder, java.math.BigDecimal maxAmount);
 }
