@@ -389,4 +389,42 @@ public class EmailService {
       log.error("Failed to send Blocked Bidder email to {}", to, e);
     }
   }
+
+  @Async
+  public void sendProductUpdateNotification(String to, String productName, String updateContent, String productLink) {
+    try {
+      jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+      org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(
+          message, true, "UTF-8");
+
+      helper.setTo(to);
+      helper.setSubject("Cập nhật thông tin sản phẩm: " + productName);
+
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+              <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px;">
+                  <h2 style="color: #0288d1;">Thông tin sản phẩm đã được cập nhật</h2>
+                  <p>Xin chào,</p>
+                  <p>Người bán vừa cập nhật thêm thông tin cho sản phẩm <b>%s</b> mà bạn đang quan tâm.</p>
+                  <div style="background: #e1f5fe; border-left: 4px solid #0288d1; margin: 15px 0; padding: 15px;">
+                      <b>Nội dung cập nhật:</b><br/>
+                      "%s"
+                  </div>
+                  <p>Hãy kiểm tra lại sản phẩm để điều chỉnh chiến thuật đấu giá của bạn.</p>
+                  <a href="%s" style="display: inline-block; padding: 10px 20px; background-color: #0288d1; color: white; text-decoration: none; border-radius: 5px;">Xem sản phẩm</a>
+              </div>
+          </body>
+          </html>
+          """
+          .formatted(productName, updateContent, productLink);
+
+      helper.setText(htmlContent, true);
+      mailSender.send(message);
+      log.info("Product Update Notification Email sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send Product Update Notification email to {}", to, e);
+    }
+  }
 }

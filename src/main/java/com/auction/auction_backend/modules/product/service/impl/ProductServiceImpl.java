@@ -40,6 +40,7 @@ public class ProductServiceImpl implements ProductService {
         private final ProductRepository productRepository;
         private final CategoryRepository categoryRepository;
         private final UserRepository userRepository;
+        private final com.auction.auction_backend.modules.notification.service.EmailService emailService;
 
         @Override
         @Transactional
@@ -187,6 +188,20 @@ public class ProductServiceImpl implements ProductService {
 
                 product.setDescription(newDescription);
                 productRepository.save(product);
+
+                // Notify all bidders
+                if (product.getBids() != null) {
+                        java.util.Set<String> uniqueBidderEmails = product.getBids().stream()
+                                        .map(bid -> bid.getBidder().getEmail())
+                                        .collect(java.util.stream.Collectors.toSet());
+
+                        String productLink = "http://localhost:5173/products/" + product.getId(); // TODO: Use config
+
+                        for (String email : uniqueBidderEmails) {
+                                emailService.sendProductUpdateNotification(email, product.getTitle(), content,
+                                                productLink);
+                        }
+                }
         }
 
         @Override
